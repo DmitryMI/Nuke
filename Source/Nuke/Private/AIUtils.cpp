@@ -2,6 +2,7 @@
 
 
 #include "AIUtils.h"
+#include "Attackable.h"
 
 bool UAIUtils::AreEnemies(AActor* actor1, AActor* actor2)
 {
@@ -197,4 +198,38 @@ bool UAIUtils::CalculateInterceptionBallistic(UBallisticMovementComponent* targe
 	}
 
 	return false;
+}
+
+bool UAIUtils::IsAttackableAlive(AActor* attackableActor)
+{
+	IAttackable* attackable = Cast<IAttackable>(attackableActor);
+	if (!attackable)
+	{
+		return false;
+	}
+
+	return attackable->IsAlive();
+}
+
+AActor* UAIUtils::GetClosestActor(const FVector& fromLocation, TArray<AActor*> actors)
+{
+	if (actors.Num() == 0)
+	{
+		return nullptr;
+	}
+
+	float minDistance = (actors[0]->GetActorLocation() - fromLocation).SizeSquared();
+	AActor* closestActor = actors[0];
+
+	for (AActor* actor : actors)
+	{
+		float distance = (actor->GetActorLocation() - fromLocation).SizeSquared();
+		if (distance < minDistance)
+		{
+			closestActor = actor;
+			minDistance = distance;
+		}
+	}
+
+	return closestActor;
 }

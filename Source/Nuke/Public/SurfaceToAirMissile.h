@@ -9,10 +9,13 @@
 #include "GenericTeamAgentInterface.h"
 #include "GuidedMissileMovementComponent.h"
 #include "Explosion.h"
+#include "Attackable.h"
 #include "SurfaceToAirMissile.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FMissileDestroyedEvent, ASurfaceToAirMissile*);
+
 UCLASS()
-class NUKE_API ASurfaceToAirMissile : public APawn, public IGenericTeamAgentInterface
+class NUKE_API ASurfaceToAirMissile : public APawn, public IGenericTeamAgentInterface, public IAttackable
 {
 	GENERATED_BODY()
 
@@ -85,6 +88,12 @@ protected:
 	UFUNCTION()
 	void OnProximityFuseCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+private:
+	FMissileDestroyedEvent missileDestroyedEvent;
+
+public:
+	FMissileDestroyedEvent& OnMissileDestroyed();
+
 #if WITH_EDITOR  
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
@@ -112,7 +121,7 @@ public:
 	void Detonate();
 
 	UFUNCTION(BlueprintCallable)
-	bool IsAlive() const;
+	bool IsAlive() const override;
 
 	UFUNCTION(BlueprintCallable)
 	void SetRendezvousLocation(const FVector& location);
@@ -122,4 +131,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetAcceleration() const;
+
+	UFUNCTION(BlueprintCallable)
+	void ReceiveDamage(float damageAmount);
 };

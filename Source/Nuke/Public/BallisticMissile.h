@@ -8,10 +8,11 @@
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/MovementComponent.h"
 #include "BallisticMovementComponent.h"
+#include "Attackable.h"
 #include "BallisticMissile.generated.h"
 
 UCLASS()
-class NUKE_API ABallisticMissile : public APawn, public IGenericTeamAgentInterface
+class NUKE_API ABallisticMissile : public APawn, public IGenericTeamAgentInterface, public IAttackable
 {
 	GENERATED_BODY()
 
@@ -111,5 +112,5 @@ public:
 	UBallisticMovementComponent* GetBallisticMovement() const;
 
 	UFUNCTION(BlueprintCallable)
-	void ReceiveDamage(float damage);
+	virtual void ReceiveDamage(float damage) override;
 };

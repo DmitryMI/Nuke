@@ -39,4 +39,10 @@ public:
 	static bool CalculateInterceptionBallistic(UBallisticMovementComponent* targetMovement, const FVector& launchLocation,
 		double projectileInitialSpeed, double projectileAcceleration, double projectileMaxSpeed,
 		FVector& outInterceptionLocation, double& outInterceptionTime, double& launchDelay);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static bool IsAttackableAlive(AActor* attackableActor);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static AActor* GetClosestActor(const FVector& fromLocation, TArray<AActor*> actors);
 };

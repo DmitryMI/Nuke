@@ -5,10 +5,11 @@
 #include "GenericTeamAgentInterface.h"
 #include "Components/SphereComponent.h"
 #include "SurfaceToAirMissile.h"
+#include "Attackable.h"
 #include "AirDefence.generated.h"
 
 UCLASS()
-class NUKE_API AAirDefence : public APawn, public IGenericTeamAgentInterface
+class NUKE_API AAirDefence : public APawn, public IGenericTeamAgentInterface, public IAttackable
 {
 	GENERATED_BODY()
 
@@ -38,7 +39,7 @@ private:
 	USphereComponent* radarCollider;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<AActor*> trackedEnemies;
+	TArray<AActor*> threatsInRadarRange;
 
 	UPROPERTY()
 	FTimerHandle cooldownHandle;
@@ -48,6 +49,12 @@ private:
 
 	UPROPERTY()
 	AActor* lockedTarget = nullptr;
+
+	UPROPERTY()
+	bool bIsAlive = true;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<ASurfaceToAirMissile*> managedMissiles;
 
 	UFUNCTION()
 	void OnCooldownExpired();
@@ -75,12 +82,14 @@ protected:
 	UFUNCTION()
 	void OnRadarOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION()
+	void OnManagedMissileDestroyed(ASurfaceToAirMissile* missile);
+
 #if WITH_EDITOR  
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -100,5 +109,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetWeaponAcceleration() const;
+
+	UFUNCTION(BlueprintCallable)
+	const TArray<ASurfaceToAirMissile*> GetManagedMissiles() const;
+
+	virtual bool IsAlive() const override;
+
+	virtual void ReceiveDamage(float damageAmount) override;
 
 };

@@ -6,6 +6,15 @@
 #include "BallisticMissile.h"
 #include "SurfaceToAirMissileController.h"
 
+bool AAirDefence::IsAlive() const
+{
+	return bIsAlive;
+}
+
+void AAirDefence::ReceiveDamage(float damageAmount)
+{
+}
+
 void AAirDefence::OnCooldownExpired()
 {
 	bIsWeaponReady = true;
@@ -40,6 +49,11 @@ void AAirDefence::BeginPlay()
 	//check(radarCollider);
 	radarCollider->OnComponentBeginOverlap.AddDynamic(this, &AAirDefence::OnRadarOverlapBegin);
 	radarCollider->OnComponentEndOverlap.AddDynamic(this, &AAirDefence::OnRadarOverlapEnd);
+
+	for (ASurfaceToAirMissile* missile : managedMissiles)
+	{
+		missile->OnMissileDestroyed().AddUObject(this, &AAirDefence::OnManagedMissileDestroyed);
+	}
 }
 
 AActor* AAirDefence::Shoot(AActor* target)
@@ -52,19 +66,19 @@ AActor* AAirDefence::Shoot(AActor* target)
 	FActorSpawnParameters spawnParams;
 	spawnParams.Instigator = this;
 	spawnParams.Owner = this;
-	APawn* projectile = GetWorld()->SpawnActor<APawn>(ammoType, GetActorLocation() + FVector::UpVector * 100, FRotator(90, 0, 0), spawnParams);
+	ASurfaceToAirMissile* projectile = GetWorld()->SpawnActor<ASurfaceToAirMissile>(ammoType, GetActorLocation() + FVector::UpVector * 100, FRotator(90, 0, 0), spawnParams);
 	if (!projectile)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn SAM!"));
 		return nullptr;
 	}
 
+	managedMissiles.Add(projectile);
+	projectile->OnMissileDestroyed().AddUObject(this, &AAirDefence::OnManagedMissileDestroyed);
+
 	ASurfaceToAirMissileController* controller = Cast<ASurfaceToAirMissileController>(projectile->GetController());
 	check(controller);
-
 	controller->SetTarget(target);
-
-	UE_LOG(LogTemp, Display, TEXT("%s launches SAM %s to intersept %s"), *GetName(), *projectile->GetName(), *target->GetName());
 
 	bIsWeaponReady = false;
 	GetWorld()->GetTimerManager().SetTimer(
@@ -75,6 +89,8 @@ AActor* AAirDefence::Shoot(AActor* target)
 		false,
 		weaponCooldown
 	);
+
+	UE_LOG(LogTemp, Display, TEXT("%s launches SAM %s to intersept %s"), *GetName(), *projectile->GetName(), *target->GetName());
 
 	return projectile;
 }
@@ -95,13 +111,19 @@ void AAirDefence::ShootDelayed(AActor* target, float delay)
 
 void AAirDefence::OnRadarOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	IAttackable* attackable = Cast<IAttackable>(OtherActor);
+	if (!attackable)
+	{
+		return;
+	}
+
 	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(OtherActor);
 	if (!teamAgent)
 	{
 		return;
 	}
 
-	if (OtherComp->GetCollisionProfileName() != "Missile")
+	if (OtherComp->GetCollisionProfileName() != "Pawn")
 	{
 		return;
 	}
@@ -112,17 +134,22 @@ void AAirDefence::OnRadarOverlapBegin(UPrimitiveComponent* OverlappedComponent, 
 		return;
 	}
 
-	ABallisticMissile* icbm = Cast<ABallisticMissile>(OtherActor);
-	if (icbm && icbm->IsAlive())
+	if (attackable->IsAlive())
 	{
 		UE_LOG(LogTemp, Display, TEXT("%s now tracks %s"), *GetName(), *OtherActor->GetName());
-		trackedEnemies.Add(OtherActor);
+		threatsInRadarRange.Add(OtherActor);
 	}
 	
 }
 
 void AAirDefence::OnRadarOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	IAttackable* attackable = Cast<IAttackable>(OtherActor);
+	if (!attackable)
+	{
+		return;
+	}
+
 	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(OtherActor);
 	if (!teamAgent)
 	{
@@ -135,11 +162,21 @@ void AAirDefence::OnRadarOverlapEnd(UPrimitiveComponent* OverlappedComponent, AA
 		return;
 	}
 
-	if (trackedEnemies.Contains(OtherActor))
+	if (OtherComp->GetCollisionProfileName() != "Pawn")
+	{
+		return;
+	}
+
+	if (threatsInRadarRange.Contains(OtherActor))
 	{
 		UE_LOG(LogTemp, Display, TEXT("%s lost track on %s"), *GetName(), *OtherActor->GetName());
-		trackedEnemies.Remove(OtherActor);
+		threatsInRadarRange.Remove(OtherActor);
 	}
+}
+
+void AAirDefence::OnManagedMissileDestroyed(ASurfaceToAirMissile* missile)
+{
+	managedMissiles.Remove(missile);
 }
 
 
@@ -181,16 +218,32 @@ bool AAirDefence::IsWeaponReady() const
 
 TArray<AActor*> AAirDefence::GetTrackedEnemies() const
 {
-	TArray<AActor*> aliveEnemies;
-	for (AActor* actor : trackedEnemies)
+	TArray<AActor*> trackedEnemies;
+	for (AActor* actor : threatsInRadarRange)
 	{
-		ABallisticMissile* missile = Cast<ABallisticMissile>(actor);
-		if (missile->IsAlive())
+		IAttackable* attackable = Cast<IAttackable>(actor);
+		check(attackable);
+
+		if (!attackable->IsAlive())
 		{
-			aliveEnemies.Add(missile);
+			continue;
 		}
+
+		TArray<FHitResult> hitResults;
+		FVector traceStart = GetActorLocation() + FVector::UpVector * 100.0f;
+		FVector traceEnd = actor->GetActorLocation();
+		FCollisionQueryParams queryParams;
+		queryParams.AddIgnoredActor(this);
+		queryParams.AddIgnoredActor(actor);
+		GetWorld()->LineTraceMultiByProfile(hitResults, traceStart, traceEnd, "RadarLineOfSight", queryParams);
+		if (hitResults.Num() != 0)
+		{
+			continue;
+		}
+
+		trackedEnemies.Add(actor);
 	}
-	return aliveEnemies;
+	return trackedEnemies;
 }
 
 float AAirDefence::GetWeaponMaxSpeed() const
@@ -201,6 +254,11 @@ float AAirDefence::GetWeaponMaxSpeed() const
 float AAirDefence::GetWeaponAcceleration() const
 {
 	return weaponAcceleration;
+}
+
+const TArray<ASurfaceToAirMissile*> AAirDefence::GetManagedMissiles() const
+{
+	return managedMissiles;
 }
 
 

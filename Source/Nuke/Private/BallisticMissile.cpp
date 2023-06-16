@@ -32,7 +32,7 @@ ABallisticMissile::ABallisticMissile()
 	bodyCollider->SetCapsuleRadius(bodyRadius);
 	bodyCollider->SetCapsuleHalfHeight(bodyLength / 2);
 	bodyCollider->SetRelativeRotation(FRotator(-90, 0, 0));
-	bodyCollider->SetCollisionProfileName("Missile");
+	bodyCollider->SetCollisionProfileName("Pawn");
 	bodyCollider->SetupAttachment(RootComponent);
 	//bodyCollider->RegisterComponent();
 

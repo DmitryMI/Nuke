@@ -7,6 +7,7 @@
 #include "SurfaceToAirMissileController.h"
 
 #if WITH_EDITOR  
+
 void ASurfaceToAirMissile::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	if (PropertyChangedEvent.Property->GetName() == "bodyRadius")
@@ -25,6 +26,11 @@ void ASurfaceToAirMissile::PostEditChangeProperty(struct FPropertyChangedEvent& 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 #endif
+
+FMissileDestroyedEvent& ASurfaceToAirMissile::OnMissileDestroyed()
+{
+	return missileDestroyedEvent;
+}
 
 void ASurfaceToAirMissile::OnDestructionDelayExpired()
 {
@@ -47,7 +53,7 @@ ASurfaceToAirMissile::ASurfaceToAirMissile()
 	bodyCollider = CreateDefaultSubobject<UCapsuleComponent>("BodyColliderComponent");
 	bodyCollider->SetCapsuleRadius(bodyRadius);
 	bodyCollider->SetCapsuleHalfHeight(bodyLength / 2);
-	bodyCollider->SetCollisionProfileName("Missile");
+	bodyCollider->SetCollisionProfileName("Pawn");
 	bodyCollider->SetRelativeRotation(FRotator(-90, 0, 0));
 	bodyCollider->SetupAttachment(RootComponent);	
 	
@@ -156,6 +162,8 @@ FGenericTeamId ASurfaceToAirMissile::GetGenericTeamId() const
 
 void ASurfaceToAirMissile::DestroyDelayed()
 {
+	missileDestroyedEvent.Broadcast(this);
+
 	// SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 	bIsAlive = false;
@@ -187,7 +195,13 @@ void ASurfaceToAirMissile::Detonate()
 	FActorSpawnParameters params;
 	params.bNoFail = true;
 	AExplosion* explosion = GetWorld()->SpawnActor<AExplosion>(explosionType, GetActorLocation(), FRotator::ZeroRotator, params);
-	check(explosion);
+	if (!explosion)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn Explosion!"));
+		DestroyDelayed();
+		return;
+	}
+
 	explosion->SetBlastDamage(explosionDamageMax);
 
 	DestroyDelayed();
@@ -213,5 +227,9 @@ float ASurfaceToAirMissile::GetMaxSpeed() const
 float ASurfaceToAirMissile::GetAcceleration() const
 {
 	return guidedMovement->GetAcceleration();
+}
+
+void ASurfaceToAirMissile::ReceiveDamage(float damageAmount)
+{
 }
 
