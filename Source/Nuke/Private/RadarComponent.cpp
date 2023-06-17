@@ -18,9 +18,9 @@ URadarComponent::URadarComponent()
 // Called when the game starts
 void URadarComponent::BeginPlay()
 {
-	Super::BeginPlay();
-
 	BindPrimitiveComponentColliders();
+
+	Super::BeginPlay();
 }
 
 void URadarComponent::BindPrimitiveComponentColliders()
@@ -32,13 +32,27 @@ void URadarComponent::BindPrimitiveComponentColliders()
 	{
 		if (UPrimitiveComponent* primitive = Cast<UPrimitiveComponent>(child))
 		{
+			TArray<AActor*> initialOverlaps;
+			primitive->GetOverlappingActors(initialOverlaps);
+			for (AActor* actor : initialOverlaps)
+			{
+				UE_LOG(LogTemp, Display, TEXT("%s: initially overlaps %s"), *GetOwner()->GetName(), *actor->GetName());
+				TArray<FOverlapInfo> overlapInfos;
+				primitive->GetOverlapsWithActor(actor, overlapInfos);
+				for (const FOverlapInfo& overlapInfo : overlapInfos)
+				{
+					UPrimitiveComponent* otherComponent = overlapInfo.OverlapInfo.GetComponent();
+					ProcessInitialOverlap(primitive, actor, otherComponent);
+				}
+			}
+
 			primitive->OnComponentBeginOverlap.AddDynamic(this, &URadarComponent::OnOverlapBegin);
 			primitive->OnComponentEndOverlap.AddDynamic(this, &URadarComponent::OnOverlapEnd);
 		}
 	}
 }
 
-void URadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void URadarComponent::OnActorEnteredRadarRage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp)
 {
 	if (OtherActor == GetOwner())
 	{
@@ -70,9 +84,20 @@ void URadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 
 	if (attackable->IsAlive())
 	{
-		UE_LOG(LogTemp, Display, TEXT("%s now tracks %s"), *GetOwner()->GetName(), *OtherActor->GetName());
+		UE_LOG(LogTemp, Display, TEXT("%s: %s is now in radar range"), *GetOwner()->GetName(), *OtherActor->GetName());
+		check(!threatsInRadarRange.Contains(OtherActor));
 		threatsInRadarRange.Add(OtherActor);
 	}
+}
+
+void URadarComponent::ProcessInitialOverlap(UPrimitiveComponent* OverlappedComponent, AActor* actor, UPrimitiveComponent* otherComponent)
+{
+	OnActorEnteredRadarRage(OverlappedComponent, actor, otherComponent);
+}
+
+void URadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	OnActorEnteredRadarRage(OverlappedComponent, OtherActor, OtherComp);
 }
 
 void URadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -105,11 +130,38 @@ void URadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 		return;
 	}
 
-	if (threatsInRadarRange.Contains(OtherActor))
+	int index = threatsInRadarRange.IndexOfByKey(OtherActor);
+
+	if (index != INDEX_NONE)
 	{
-		UE_LOG(LogTemp, Display, TEXT("%s lost track on %s"), *GetName(), *OtherActor->GetName());
-		threatsInRadarRange.Remove(OtherActor);
+		UE_LOG(LogTemp, Display, TEXT("%s: %s left radar range"), *GetOwner()->GetName(), *OtherActor->GetName());
+		threatsInRadarRange.RemoveAt(index);
 	}
+}
+
+bool URadarComponent::IsTracked(AActor* actor) const
+{
+	IAttackable* attackable = Cast<IAttackable>(actor);
+	check(attackable);
+
+	if (!attackable->IsAlive())
+	{
+		return false;
+	}
+
+	TArray<FHitResult> hitResults;
+	FVector traceStart = GetOwner()->GetActorLocation() + GetRelativeLocation();
+	FVector traceEnd = actor->GetActorLocation();
+	FCollisionQueryParams queryParams;
+	queryParams.AddIgnoredActor(GetOwner());
+	queryParams.AddIgnoredActor(actor);
+	GetWorld()->LineTraceMultiByProfile(hitResults, traceStart, traceEnd, "RadarLineOfSight", queryParams);
+	if (hitResults.Num() != 0)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -126,22 +178,7 @@ TArray<AActor*> URadarComponent::GetTrackedThreats() const
 	TArray<AActor*> trackedEnemies;
 	for (AActor* actor : threatsInRadarRange)
 	{
-		IAttackable* attackable = Cast<IAttackable>(actor);
-		check(attackable);
-
-		if (!attackable->IsAlive())
-		{
-			continue;
-		}
-
-		TArray<FHitResult> hitResults;
-		FVector traceStart = GetOwner()->GetActorLocation() + GetRelativeLocation();
-		FVector traceEnd = actor->GetActorLocation();
-		FCollisionQueryParams queryParams;
-		queryParams.AddIgnoredActor(GetOwner());
-		queryParams.AddIgnoredActor(actor);
-		GetWorld()->LineTraceMultiByProfile(hitResults, traceStart, traceEnd, "RadarLineOfSight", queryParams);
-		if (hitResults.Num() != 0)
+		if (!IsTracked(actor))
 		{
 			continue;
 		}

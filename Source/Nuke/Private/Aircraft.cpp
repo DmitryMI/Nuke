@@ -53,8 +53,6 @@ void AAircraft::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("guidedMovement was nullptr!"));
 		aircraftMovement = GetComponentByClass<UAircraftMovementComponent>();
 	}
-
-
 }
 
 void AAircraft::DestroyDelayed()

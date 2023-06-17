@@ -3,3 +3,18 @@
 
 #include "Fighter.h"
 
+void AFighter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	fighterRadar = GetComponentByClass<URadarConeComponent>();
+	ensure(fighterRadar);
+
+	fighterRadar->SetRadarRange(radarRange);
+	fighterRadar->SetConeAngleDeg(radarConeAngle);
+}
+
+AFighter::AFighter() : Super()
+{
+
+}
