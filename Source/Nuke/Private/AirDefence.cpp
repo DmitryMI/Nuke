@@ -35,10 +35,9 @@ AAirDefence::AAirDefence()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	//RootComponent->RegisterComponent();
 
-	radarCollider = CreateDefaultSubobject<USphereComponent>("RadarQueryCollider");
-	radarCollider->SetCollisionProfileName(TEXT("RadarQuery"));
-	radarCollider->SetSphereRadius(weaponRange);
-	radarCollider->SetupAttachment(RootComponent);
+	radarComponent = CreateDefaultSubobject<URadarSphereComponent>("RadarCollider");
+	radarComponent->SetRadarRadius(weaponRange);
+	radarComponent->SetupAttachment(RootComponent);
 	//radarCollider->RegisterComponent();
 }
 
@@ -46,9 +45,6 @@ AAirDefence::AAirDefence()
 void AAirDefence::BeginPlay()
 {
 	Super::BeginPlay();
-	//check(radarCollider);
-	radarCollider->OnComponentBeginOverlap.AddDynamic(this, &AAirDefence::OnRadarOverlapBegin);
-	radarCollider->OnComponentEndOverlap.AddDynamic(this, &AAirDefence::OnRadarOverlapEnd);
 
 	for (AAntiAirMissile* missile : managedMissiles)
 	{
@@ -109,71 +105,6 @@ void AAirDefence::ShootDelayed(AActor* target, float delay)
 	);
 }
 
-void AAirDefence::OnRadarOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	IAttackable* attackable = Cast<IAttackable>(OtherActor);
-	if (!attackable)
-	{
-		return;
-	}
-
-	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(OtherActor);
-	if (!teamAgent)
-	{
-		return;
-	}
-
-	if (OtherComp->GetCollisionProfileName() != "Pawn")
-	{
-		return;
-	}
-
-	FGenericTeamId otherTeam = teamAgent->GetGenericTeamId();
-	if (FGenericTeamId::GetAttitude(GetGenericTeamId(), otherTeam) != ETeamAttitude::Hostile)
-	{
-		return;
-	}
-
-	if (attackable->IsAlive())
-	{
-		UE_LOG(LogTemp, Display, TEXT("%s now tracks %s"), *GetName(), *OtherActor->GetName());
-		threatsInRadarRange.Add(OtherActor);
-	}
-	
-}
-
-void AAirDefence::OnRadarOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	IAttackable* attackable = Cast<IAttackable>(OtherActor);
-	if (!attackable)
-	{
-		return;
-	}
-
-	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(OtherActor);
-	if (!teamAgent)
-	{
-		return;
-	}
-
-	FGenericTeamId otherTeam = teamAgent->GetGenericTeamId();
-	if (FGenericTeamId::GetAttitude(GetGenericTeamId(), otherTeam) != ETeamAttitude::Hostile)
-	{
-		return;
-	}
-
-	if (OtherComp->GetCollisionProfileName() != "Pawn")
-	{
-		return;
-	}
-
-	if (threatsInRadarRange.Contains(OtherActor))
-	{
-		UE_LOG(LogTemp, Display, TEXT("%s lost track on %s"), *GetName(), *OtherActor->GetName());
-		threatsInRadarRange.Remove(OtherActor);
-	}
-}
-
 void AAirDefence::OnManagedMissileDestroyed(AMissile* missile)
 {
 	AAntiAirMissile* sam = Cast<AAntiAirMissile>(missile);
@@ -186,7 +117,7 @@ void AAirDefence::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyC
 {
 	if (PropertyChangedEvent.Property->GetName() == "weaponRange")
 	{
-		radarCollider->SetSphereRadius(weaponRange);
+		radarComponent->SetRadarRadius(weaponRange);
 	}
 
 
@@ -219,32 +150,7 @@ bool AAirDefence::IsWeaponReady() const
 
 TArray<AActor*> AAirDefence::GetTrackedEnemies() const
 {
-	TArray<AActor*> trackedEnemies;
-	for (AActor* actor : threatsInRadarRange)
-	{
-		IAttackable* attackable = Cast<IAttackable>(actor);
-		check(attackable);
-
-		if (!attackable->IsAlive())
-		{
-			continue;
-		}
-
-		TArray<FHitResult> hitResults;
-		FVector traceStart = GetActorLocation() + FVector::UpVector * 100.0f;
-		FVector traceEnd = actor->GetActorLocation();
-		FCollisionQueryParams queryParams;
-		queryParams.AddIgnoredActor(this);
-		queryParams.AddIgnoredActor(actor);
-		GetWorld()->LineTraceMultiByProfile(hitResults, traceStart, traceEnd, "RadarLineOfSight", queryParams);
-		if (hitResults.Num() != 0)
-		{
-			continue;
-		}
-
-		trackedEnemies.Add(actor);
-	}
-	return trackedEnemies;
+	return radarComponent->GetTrackedThreats();
 }
 
 float AAirDefence::GetWeaponMaxSpeed() const

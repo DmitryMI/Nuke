@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GenericTeamAgentInterface.h"
-#include "Components/SphereComponent.h"
+#include "RadarSphereComponent.h"
 #include "AntiAirMissile.h"
 #include "Attackable.h"
 #include "AirDefence.generated.h"
@@ -36,10 +36,7 @@ private:
 	FGenericTeamId teamId = FGenericTeamId::NoTeam;
 
 	UPROPERTY(EditAnywhere)
-	USphereComponent* radarCollider;
-
-	UPROPERTY(VisibleAnywhere)
-	TArray<AActor*> threatsInRadarRange;
+	URadarSphereComponent* radarComponent;
 
 	UPROPERTY()
 	FTimerHandle cooldownHandle;
@@ -75,12 +72,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void ShootDelayed(AActor* target, float delay);
-
-	UFUNCTION()
-	void OnRadarOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	
-	UFUNCTION()
-	void OnRadarOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
 	void OnManagedMissileDestroyed(AMissile* missile);

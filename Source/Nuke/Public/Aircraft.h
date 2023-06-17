@@ -46,6 +46,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float destroyDelay = 5.0f;
 
+	UPROPERTY(VisibleAnywhere)
+	TArray<AActor*> threatsInRadarRange;
+
 	UPROPERTY()
 	FTimerHandle destroyDelayedHandle;
 
