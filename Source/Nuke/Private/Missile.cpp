@@ -164,8 +164,6 @@ void AMissile::DestroyDelayed()
 	);
 }
 
-
-
 void AMissile::Detonate()
 {
 	if (!bIsAlive)

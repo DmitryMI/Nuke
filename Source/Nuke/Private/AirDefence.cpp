@@ -4,7 +4,7 @@
 #include "AirDefence.h"
 #include "AIController.h"
 #include "BallisticMissile.h"
-#include "SurfaceToAirMissileController.h"
+#include "AntiAirMissileController.h"
 
 bool AAirDefence::IsAlive() const
 {
@@ -50,7 +50,7 @@ void AAirDefence::BeginPlay()
 	radarCollider->OnComponentBeginOverlap.AddDynamic(this, &AAirDefence::OnRadarOverlapBegin);
 	radarCollider->OnComponentEndOverlap.AddDynamic(this, &AAirDefence::OnRadarOverlapEnd);
 
-	for (ASurfaceToAirMissile* missile : managedMissiles)
+	for (AAntiAirMissile* missile : managedMissiles)
 	{
 		missile->OnMissileDestroyed().AddUObject(this, &AAirDefence::OnManagedMissileDestroyed);
 	}
@@ -66,7 +66,7 @@ AActor* AAirDefence::Shoot(AActor* target)
 	FActorSpawnParameters spawnParams;
 	spawnParams.Instigator = this;
 	spawnParams.Owner = this;
-	ASurfaceToAirMissile* projectile = GetWorld()->SpawnActor<ASurfaceToAirMissile>(ammoType, GetActorLocation() + FVector::UpVector * 100, FRotator(90, 0, 0), spawnParams);
+	AAntiAirMissile* projectile = GetWorld()->SpawnActor<AAntiAirMissile>(ammoType, GetActorLocation() + FVector::UpVector * 100, FRotator(90, 0, 0), spawnParams);
 	if (!projectile)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn SAM!"));
@@ -76,7 +76,7 @@ AActor* AAirDefence::Shoot(AActor* target)
 	managedMissiles.Add(projectile);
 	projectile->OnMissileDestroyed().AddUObject(this, &AAirDefence::OnManagedMissileDestroyed);
 
-	ASurfaceToAirMissileController* controller = Cast<ASurfaceToAirMissileController>(projectile->GetController());
+	AAntiAirMissileController* controller = Cast<AAntiAirMissileController>(projectile->GetController());
 	check(controller);
 	controller->SetTarget(target);
 
@@ -176,7 +176,7 @@ void AAirDefence::OnRadarOverlapEnd(UPrimitiveComponent* OverlappedComponent, AA
 
 void AAirDefence::OnManagedMissileDestroyed(AMissile* missile)
 {
-	ASurfaceToAirMissile* sam = Cast<ASurfaceToAirMissile>(missile);
+	AAntiAirMissile* sam = Cast<AAntiAirMissile>(missile);
 	managedMissiles.Remove(sam);
 }
 
@@ -257,7 +257,7 @@ float AAirDefence::GetWeaponAcceleration() const
 	return weaponAcceleration;
 }
 
-const TArray<ASurfaceToAirMissile*> AAirDefence::GetManagedMissiles() const
+const TArray<AAntiAirMissile*> AAirDefence::GetManagedMissiles() const
 {
 	return managedMissiles;
 }

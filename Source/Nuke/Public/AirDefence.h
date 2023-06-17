@@ -4,7 +4,7 @@
 #include "GameFramework/Pawn.h"
 #include "GenericTeamAgentInterface.h"
 #include "Components/SphereComponent.h"
-#include "SurfaceToAirMissile.h"
+#include "AntiAirMissile.h"
 #include "Attackable.h"
 #include "AirDefence.generated.h"
 
@@ -16,7 +16,7 @@ class NUKE_API AAirDefence : public APawn, public IGenericTeamAgentInterface, pu
 private:
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<ASurfaceToAirMissile> ammoType;
+	TSubclassOf<AAntiAirMissile> ammoType;
 
 	UPROPERTY(EditDefaultsOnly)
 	float weaponRange = 20000;
@@ -54,7 +54,7 @@ private:
 	bool bIsAlive = true;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<ASurfaceToAirMissile*> managedMissiles;
+	TArray<AAntiAirMissile*> managedMissiles;
 
 	UFUNCTION()
 	void OnCooldownExpired();
@@ -111,7 +111,7 @@ public:
 	float GetWeaponAcceleration() const;
 
 	UFUNCTION(BlueprintCallable)
-	const TArray<ASurfaceToAirMissile*> GetManagedMissiles() const;
+	const TArray<AAntiAirMissile*> GetManagedMissiles() const;
 
 	virtual bool IsAlive() const override;
 

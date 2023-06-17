@@ -1,28 +1,28 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SurfaceToAirMissileController.h"
-#include "SurfaceToAirMissile.h"
+#include "AntiAirMissileController.h"
+#include "AntiAirMissile.h"
 #include "AIUtils.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GuidedMissileMovementComponent.h"
 #include "DrawDebugHelpers.h"
 
-UGuidedMissileMovementComponent* ASurfaceToAirMissileController::GetGuidedMovementComponent() const
+UGuidedMissileMovementComponent* AAntiAirMissileController::GetGuidedMovementComponent() const
 {
-	ASurfaceToAirMissile* missile = Cast<ASurfaceToAirMissile>(GetPawn());
+	AAntiAirMissile* missile = Cast<AAntiAirMissile>(GetPawn());
 	check(missile);
 
 	UGuidedMissileMovementComponent* guidedMissileMovement = missile->FindComponentByClass<UGuidedMissileMovementComponent>();;
 	return guidedMissileMovement;
 }
 
-void ASurfaceToAirMissileController::Tick(float DeltaTime)
+void AAntiAirMissileController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-void ASurfaceToAirMissileController::FlyTowardsLocation(const FVector& location)
+void AAntiAirMissileController::FlyTowardsLocation(const FVector& location)
 {
 	UGuidedMissileMovementComponent* guidedMissileMovement = GetGuidedMovementComponent();
 	check(guidedMissileMovement);
@@ -30,7 +30,7 @@ void ASurfaceToAirMissileController::FlyTowardsLocation(const FVector& location)
 	guidedMissileMovement->RequestMovementTowardsLocation(location);
 }
 
-void ASurfaceToAirMissileController::FlyTowardsTargetActor()
+void AAntiAirMissileController::FlyTowardsTargetActor()
 {
 	UGuidedMissileMovementComponent* guidedMissileMovement = GetGuidedMovementComponent();
 	check(guidedMissileMovement);
@@ -38,7 +38,7 @@ void ASurfaceToAirMissileController::FlyTowardsTargetActor()
 	guidedMissileMovement->RequestMovementTowardsTargetActor();
 }
 
-void ASurfaceToAirMissileController::FlyTowardsLinearInterceptionLocation()
+void AAntiAirMissileController::FlyTowardsLinearInterceptionLocation()
 {
 	UGuidedMissileMovementComponent* guidedMissileMovement = GetGuidedMovementComponent();
 	float maxSpeed = guidedMissileMovement->GetMaxSpeed();
@@ -68,12 +68,12 @@ void ASurfaceToAirMissileController::FlyTowardsLinearInterceptionLocation()
 	}
 }
 
-AActor* ASurfaceToAirMissileController::GetTarget() const
+AActor* AAntiAirMissileController::GetTarget() const
 {
 	return target;
 }
 
-void ASurfaceToAirMissileController::SetTarget(AActor* targetNew)
+void AAntiAirMissileController::SetTarget(AActor* targetNew)
 {
 	this->target = targetNew;
 	GetBlackboardComponent()->SetValueAsObject("Target", targetNew);
@@ -84,7 +84,7 @@ void ASurfaceToAirMissileController::SetTarget(AActor* targetNew)
 	FlyTowardsTargetActor();
 }
 
-void ASurfaceToAirMissileController::SetRendezvousLocation(const FVector& location)
+void AAntiAirMissileController::SetRendezvousLocation(const FVector& location)
 {
 	rendezvousLocation = location;
 	GetBlackboardComponent()->SetValueAsVector("RendezvousLocation", location);

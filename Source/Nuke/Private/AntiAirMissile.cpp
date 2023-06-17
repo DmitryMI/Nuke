@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SurfaceToAirMissile.h"
+#include "AntiAirMissile.h"
 #include "Components/ArrowComponent.h"
 #include "GuidedMissileMovementComponent.h"
-#include "SurfaceToAirMissileController.h"
+#include "AntiAirMissileController.h"
 
 // Sets default values
-ASurfaceToAirMissile::ASurfaceToAirMissile()
+AAntiAirMissile::AAntiAirMissile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -15,7 +15,7 @@ ASurfaceToAirMissile::ASurfaceToAirMissile()
 }
 
 // Called when the game starts or when spawned
-void ASurfaceToAirMissile::BeginPlay()
+void AAntiAirMissile::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -28,12 +28,12 @@ void ASurfaceToAirMissile::BeginPlay()
 	
 }
 
-void ASurfaceToAirMissile::OnBodyCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AAntiAirMissile::OnBodyCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Super::OnBodyCollisionBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
 
-void ASurfaceToAirMissile::OnProximityFuseCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AAntiAirMissile::OnProximityFuseCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Super::OnProximityFuseCollisionBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
@@ -41,26 +41,26 @@ void ASurfaceToAirMissile::OnProximityFuseCollisionBegin(UPrimitiveComponent* Ov
 
 
 // Called every frame
-void ASurfaceToAirMissile::Tick(float DeltaTime)
+void AAntiAirMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 
 }
 
-void ASurfaceToAirMissile::SetLockedOnTarget(AActor* actor)
+void AAntiAirMissile::SetLockedOnTarget(AActor* actor)
 {
-	ASurfaceToAirMissileController* controller = GetController<ASurfaceToAirMissileController>();
+	AAntiAirMissileController* controller = GetController<AAntiAirMissileController>();
 	controller->SetTarget(actor);
 }
 
-AActor* ASurfaceToAirMissile::GetLockedOnTarget() const
+AActor* AAntiAirMissile::GetLockedOnTarget() const
 {
-	ASurfaceToAirMissileController* controller = GetController<ASurfaceToAirMissileController>();
+	AAntiAirMissileController* controller = GetController<AAntiAirMissileController>();
 	return controller->GetTarget();
 }
 
-void ASurfaceToAirMissile::DestroyDelayed()
+void AAntiAirMissile::DestroyDelayed()
 {
 	Super::DestroyDelayed();
 
@@ -71,19 +71,19 @@ void ASurfaceToAirMissile::DestroyDelayed()
 }
 
 
-void ASurfaceToAirMissile::SetRendezvousLocation(const FVector& location)
+void AAntiAirMissile::SetRendezvousLocation(const FVector& location)
 {
-	ASurfaceToAirMissileController* controller = GetController<ASurfaceToAirMissileController>();
+	AAntiAirMissileController* controller = GetController<AAntiAirMissileController>();
 	check(controller);
 	controller->SetRendezvousLocation(location);
 }
 
-float ASurfaceToAirMissile::GetMaxSpeed() const
+float AAntiAirMissile::GetMaxSpeed() const
 {
 	return guidedMovement->GetMaxSpeed();
 }
 
-float ASurfaceToAirMissile::GetAcceleration() const
+float AAntiAirMissile::GetAcceleration() const
 {
 	return guidedMovement->GetAcceleration();
 }

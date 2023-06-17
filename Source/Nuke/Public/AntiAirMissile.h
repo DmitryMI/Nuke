@@ -9,11 +9,11 @@
 #include "Components/SphereComponent.h"
 #include "GuidedMissileMovementComponent.h"
 #include "Explosion.h"
-#include "SurfaceToAirMissile.generated.h"
+#include "AntiAirMissile.generated.h"
 
 
 UCLASS()
-class NUKE_API ASurfaceToAirMissile : public AMissile
+class NUKE_API AAntiAirMissile : public AMissile
 {
 	GENERATED_BODY()
 
@@ -23,7 +23,7 @@ private:
 
 public:
 	// Sets default values for this pawn's properties
-	ASurfaceToAirMissile();
+	AAntiAirMissile();
 
 protected:
 	// Called when the game starts or when spawned

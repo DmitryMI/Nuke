@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "SurfaceToAirMissileController.generated.h"
+#include "AntiAirMissileController.generated.h"
 
 class UGuidedMissileMovementComponent;
 
@@ -12,7 +12,7 @@ class UGuidedMissileMovementComponent;
  * 
  */
 UCLASS()
-class NUKE_API ASurfaceToAirMissileController : public AAIController
+class NUKE_API AAntiAirMissileController : public AAIController
 {
 	GENERATED_BODY()
 	
