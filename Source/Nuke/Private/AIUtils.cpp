@@ -211,6 +211,17 @@ bool UAIUtils::IsAttackableAlive(AActor* attackableActor)
 	return attackable->IsAlive();
 }
 
+void UAIUtils::AttackableReceiveDamage(AActor* attackableActor, float damageAmount)
+{
+	IAttackable* attackable = Cast<IAttackable>(attackableActor);
+	if (!attackable)
+	{
+		return;
+	}
+
+	attackable->ReceiveDamage(damageAmount);
+}
+
 AActor* UAIUtils::GetClosestActor(const FVector& fromLocation, TArray<AActor*> actors)
 {
 	if (actors.Num() == 0)
@@ -232,4 +243,29 @@ AActor* UAIUtils::GetClosestActor(const FVector& fromLocation, TArray<AActor*> a
 	}
 
 	return closestActor;
+}
+
+TArray<FAircraftWaypoint> UAIUtils::GenerateRandomAircraftPath(FVector startingLocation, float segmentLength, int points, FVector2D altitudeRange)
+{
+	TArray<FAircraftWaypoint> result;
+
+	FVector2D randomPoint2D = FMath::RandPointInCircle(segmentLength);
+	FVector randomPoint = FVector(randomPoint2D.X, randomPoint2D.Y, 0);
+	FAircraftWaypoint lastWaypoint;
+	lastWaypoint.Location = startingLocation + randomPoint;
+	lastWaypoint.Location.Z = FMath::RandRange(altitudeRange.X, altitudeRange.Y);
+	lastWaypoint.Speed = 1500.0f;
+
+	result.Add(lastWaypoint);
+	
+	for (int i = 0; i < points; i++)
+	{
+		randomPoint2D = FMath::RandPointInCircle(segmentLength);
+		randomPoint = FVector(randomPoint2D.X, randomPoint2D.Y, 0);
+		lastWaypoint.Location = lastWaypoint.Location + randomPoint;
+		lastWaypoint.Location.Z = FMath::RandRange(altitudeRange.X, altitudeRange.Y);
+		result.Add(lastWaypoint);
+	}
+
+	return result;
 }

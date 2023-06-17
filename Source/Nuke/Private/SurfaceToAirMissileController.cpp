@@ -88,4 +88,5 @@ void ASurfaceToAirMissileController::SetRendezvousLocation(const FVector& locati
 {
 	rendezvousLocation = location;
 	GetBlackboardComponent()->SetValueAsVector("RendezvousLocation", location);
+	GetBlackboardComponent()->SetValueAsBool("HasRendezvousLocation", true);
 }

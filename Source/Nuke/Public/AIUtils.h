@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "GenericTeamAgentInterface.h"
 #include "BallisticMovementComponent.h"
+#include "AircraftWaypoint.h"
 #include "AIUtils.generated.h"
 
 /**
@@ -44,5 +45,11 @@ public:
 	static bool IsAttackableAlive(AActor* attackableActor);
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
+	static void AttackableReceiveDamage(AActor* attackableActor, float damageAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
 	static AActor* GetClosestActor(const FVector& fromLocation, TArray<AActor*> actors);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static TArray<FAircraftWaypoint> GenerateRandomAircraftPath(FVector startingLocation, float segmentLength = 5000.0f, int points = 10, FVector2D altitudeRange = FVector2D(1000.0f, 5000.0f));
 };

@@ -2,7 +2,7 @@
 
 
 #include "Explosion.h"
-#include "BallisticMissile.h"
+#include "Attackable.h"
 
 #if WITH_EDITOR  
 void AExplosion::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
@@ -72,14 +72,14 @@ void AExplosion::BeginPlay()
 
 void AExplosion::OnBlastDamageCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!bIsBlastActive)
+    if (!bIsBlastActive)
 	{
 		return;
 	}
-	ABallisticMissile* ballisticMissile = Cast<ABallisticMissile>(OtherActor);
-	if (ballisticMissile)
+	IAttackable* attackable = Cast<IAttackable>(OtherActor);
+	if (attackable)
 	{
-		ballisticMissile->ReceiveDamage(blastDamageMax);
+		attackable->ReceiveDamage(blastDamageMax);
 	}
 }
 
