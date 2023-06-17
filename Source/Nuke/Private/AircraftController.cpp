@@ -99,7 +99,6 @@ void AAircraftController::DrawFollowedPath(float lineLifetime) const
 		FVector end = FollowedPath[i + 1].Location;
 
 		DrawDebugLine(GetWorld(), start, end, FColor::Red, persistentLines, lineLifetime);
-		//DrawDebugSphere(GetWorld(), start, PathFollowingTolerance, 6, FColor::Red, persistentLines, lineLifetime);
 		DrawDebugSphere(GetWorld(), end, PathFollowingTolerance, 8, FColor::Red, persistentLines, lineLifetime);
 	}
 }

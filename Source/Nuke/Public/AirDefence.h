@@ -83,7 +83,7 @@ protected:
 	void OnRadarOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
-	void OnManagedMissileDestroyed(ASurfaceToAirMissile* missile);
+	void OnManagedMissileDestroyed(AMissile* missile);
 
 #if WITH_EDITOR  
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;

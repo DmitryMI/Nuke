@@ -174,9 +174,10 @@ void AAirDefence::OnRadarOverlapEnd(UPrimitiveComponent* OverlappedComponent, AA
 	}
 }
 
-void AAirDefence::OnManagedMissileDestroyed(ASurfaceToAirMissile* missile)
+void AAirDefence::OnManagedMissileDestroyed(AMissile* missile)
 {
-	managedMissiles.Remove(missile);
+	ASurfaceToAirMissile* sam = Cast<ASurfaceToAirMissile>(missile);
+	managedMissiles.Remove(sam);
 }
 
 
