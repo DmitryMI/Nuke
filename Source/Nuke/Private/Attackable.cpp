@@ -13,3 +13,8 @@ bool IAttackable::IsAlive() const
 {
     return false;
 }
+
+EMobilityEnvironmentType IAttackable::GetMobilityEnvironmentType() const
+{
+    return EMobilityEnvironmentType::MET_None;
+}
