@@ -81,7 +81,7 @@ void AAircraftController::DrawFollowedPath(float lineLifetime) const
 
 	if (!GetPawn()->IsSelectedInEditor() && !IsSelectedInEditor())
 	{
-		return;
+		//return;
 	}
 
 	int sphereSegments = 8;
@@ -140,7 +140,7 @@ void AAircraftController::ScoutLocation(const FVector& location)
 	float intermediateDistance = FMath::Min(3000.0f, distance / 2.0f);
 
 	direction /= distance;
-	FVector intermediatePoint = aircraft->GetActorLocation() + direction * 3000.0f;
+	FVector intermediatePoint = aircraft->GetActorLocation() + direction * 10000.0f;
 	intermediatePoint.Z = location.Z;
 
 	pathToLocation.Add(FAircraftWaypoint(intermediatePoint, maxSpeed));

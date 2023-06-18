@@ -20,7 +20,13 @@ private:
 	FVector2D maxAngularSpeedsPitchYaw = FVector2D(90, 90);
 
 	UPROPERTY(EditDefaultsOnly)
+	FVector2D minAngularSpeedsPitchYaw = FVector2D(20, 20);
+
+	UPROPERTY(EditDefaultsOnly)
 	FVector maxVisualRotationSpeed = FVector(90, 90, 90);
+
+	UPROPERTY(EditDefaultsOnly)
+	float maxRollAngleDeg = 60.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 	FVector2D pitchMinMax = FVector2D(-45, 45);

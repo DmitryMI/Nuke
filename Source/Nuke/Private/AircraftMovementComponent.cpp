@@ -28,7 +28,7 @@ void UAircraftMovementComponent::RequestSpeed(float speed)
 	}
 	else if (requestedSpeed < speedMinMax.X)
 	{
-		requestedSpeed = speedMinMax.X;
+requestedSpeed = speedMinMax.X;
 	}
 
 	bNavigateToWaypoint = false;
@@ -40,7 +40,7 @@ void UAircraftMovementComponent::UpdateMovementSpeed(float DeltaTime)
 	float deltaRequestedSpeed = requestedSpeed - currentSpeed;
 	if (deltaRequestedSpeed > 0)
 	{
-		deltaSpeed = ClampAbs(deltaRequestedSpeed, acceleration * DeltaTime); 
+		deltaSpeed = ClampAbs(deltaRequestedSpeed, acceleration * DeltaTime);
 	}
 	else
 	{
@@ -82,19 +82,20 @@ FRotator UAircraftMovementComponent::RotateTowardsTarget(float DeltaTime)
 
 	if (FMath::IsNearlyZero(yawAngleDelta))
 	{
-		rotation.Roll = 0;
+		yawAngleDelta = 0;
 	}
 	else if (yawAngleDelta > 0)
 	{
-		rotation.Yaw += FMath::Min(maxAngularSpeedsPitchYaw.Y * DeltaTime, yawAngleDelta);
-		rotation.Roll = 60;
+		yawAngleDelta = FMath::Min(maxAngularSpeedsPitchYaw.Y * DeltaTime, yawAngleDelta);
 	}
 	else
 	{
-		rotation.Yaw += FMath::Max(-maxAngularSpeedsPitchYaw.Y * DeltaTime, yawAngleDelta);
-		rotation.Roll = -60;
+		yawAngleDelta = FMath::Max(-maxAngularSpeedsPitchYaw.Y * DeltaTime, yawAngleDelta);
 	}
-	
+	rotation.Yaw += yawAngleDelta;
+
+	rotation.Roll = maxRollAngleDeg * yawAngleDelta / (maxAngularSpeedsPitchYaw.Y * DeltaTime);
+
 	return rotation;
 }
 
@@ -110,8 +111,54 @@ void UAircraftMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 		FVector direction = requestedWaypoint.Location - GetOwner()->GetActorLocation();
 		if (!direction.IsNearlyZero())
 		{
+			float distance = direction.Size();
+
+			FRotator velocityRotator = Velocity.Rotation();
 			FRotator rotatorTowardsWaypoint = direction.Rotation();
-			requestedRotation = rotatorTowardsWaypoint;
+			if (FMath::IsNearlyZero(rotatorTowardsWaypoint.Yaw))
+			{
+				requestedRotation.Yaw = 0;
+			}
+			else
+			{
+				float yawDelta = FMath::FindDeltaAngleDegrees(velocityRotator.Yaw, rotatorTowardsWaypoint.Yaw);
+				float yawDeltaRad = FMath::DegreesToRadians(yawDelta);
+				float yawDeltaRadAbs = FMath::Abs(yawDeltaRad);
+				float arcDistance = 1 / (2 * FMath::Sin(yawDeltaRadAbs / 2)) * distance * yawDeltaRadAbs;
+				float arcFraction = currentSpeed / arcDistance * DeltaTime;
+				float yawStep = yawDelta * arcFraction;
+
+				float minAngularStep = minAngularSpeedsPitchYaw.Y * DeltaTime;
+				if (FMath::Abs(yawStep) < minAngularStep)
+				{
+					float yawStepAbs = FMath::Min(FMath::Abs(yawDelta), minAngularStep);
+					yawStep = FMath::Sign(yawStep) * minAngularStep;
+				}				
+				requestedRotation.Yaw = velocityRotator.Yaw + yawStep;
+			}
+
+			if (FMath::IsNearlyZero(rotatorTowardsWaypoint.Pitch))
+			{
+				requestedRotation.Pitch = 0;
+			}
+			else
+			{
+				float pitchDelta = FMath::FindDeltaAngleDegrees(velocityRotator.Pitch, rotatorTowardsWaypoint.Pitch);
+				float pitchDeltaRad = FMath::DegreesToRadians(pitchDelta);
+				float pitchDeltaRadAbs = FMath::Abs(pitchDeltaRad);
+				float arcDistance = 1 / (2 * FMath::Sin(pitchDeltaRadAbs / 2)) * distance * pitchDeltaRadAbs;
+				float arcFraction = currentSpeed / arcDistance * DeltaTime;
+				float pitchStep = pitchDelta * arcFraction;
+				float minAngularStep = minAngularSpeedsPitchYaw.X * DeltaTime;
+				if (FMath::Abs(pitchStep) < minAngularStep)
+				{
+					float pitchStepAbs = FMath::Min(FMath::Abs(pitchDelta), minAngularStep);
+					pitchStep = FMath::Sign(pitchStep) * minAngularStep;
+				}
+				requestedRotation.Pitch = velocityRotator.Pitch + pitchStep;
+			}
+
+			//requestedRotation = rotatorTowardsWaypoint;
 		}
 		else
 		{
