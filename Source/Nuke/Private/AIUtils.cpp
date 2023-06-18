@@ -3,6 +3,7 @@
 
 #include "AIUtils.h"
 #include "Attackable.h"
+#include "Kismet/GameplayStatics.h"
 
 bool UAIUtils::AreEnemies(AActor* actor1, AActor* actor2)
 {
@@ -268,4 +269,35 @@ TArray<FAircraftWaypoint> UAIUtils::GenerateRandomAircraftPath(FVector startingL
 	}
 
 	return result;
+}
+
+TArray<AActor*> UAIUtils::GetEnemyCities(AActor* teamAgentActor)
+{
+	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(teamAgentActor);
+
+	TArray<AActor*> cities;
+	TArray<AActor*> cityActors;
+	UGameplayStatics::GetAllActorsOfClass(teamAgentActor, ACity::StaticClass(), cityActors);
+
+	for (AActor* actor : cityActors)
+	{
+		ACity* city = Cast<ACity>(actor);
+		if (teamAgent->GetTeamAttitudeTowards(*city) == ETeamAttitude::Hostile)
+		{
+			cities.Add(city);
+		}
+	}
+
+	return cities;
+}
+
+AActor* UAIUtils::GetRandomActor(const TArray<AActor*>& actors)
+{
+	if (actors.Num() == 0)
+	{
+		return nullptr;
+	}
+
+	int index = FMath::RandRange(0, actors.Num() - 1);
+	return actors[index];
 }

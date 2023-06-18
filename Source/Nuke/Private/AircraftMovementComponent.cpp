@@ -38,7 +38,14 @@ void UAircraftMovementComponent::UpdateMovementSpeed(float DeltaTime)
 {
 	float deltaSpeed;
 	float deltaRequestedSpeed = requestedSpeed - currentSpeed;
-	deltaSpeed = ClampAbs(deltaRequestedSpeed, acceleration * DeltaTime);
+	if (deltaRequestedSpeed > 0)
+	{
+		deltaSpeed = ClampAbs(deltaRequestedSpeed, acceleration * DeltaTime); 
+	}
+	else
+	{
+		deltaSpeed = ClampAbs(deltaRequestedSpeed, deceleration * DeltaTime);
+	}
 	currentSpeed += deltaSpeed;
 	currentSpeed = FMath::Clamp(currentSpeed, speedMinMax.X, speedMinMax.Y);
 }
@@ -149,4 +156,9 @@ float UAircraftMovementComponent::GetCurrentSpeed() const
 void UAircraftMovementComponent::FreezeMovement()
 {
 	bIsMovementFrozen = true;
+}
+
+float UAircraftMovementComponent::GetMaxSpeed() const
+{
+	return speedMinMax.Y;
 }

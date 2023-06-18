@@ -3,6 +3,7 @@
 
 #include "Airbase.h"
 #include "Kismet/GameplayStatics.h"
+#include "AircraftController.h"
 
 void AAirbase::OnLauchStateCooldownExpired()
 {
@@ -53,7 +54,9 @@ AAircraft* AAirbase::LaunchAircraft(TSubclassOf<AAircraft> aircraftType)
 		return nullptr;
 	}
 
-	FVector spawnLocation = GetActorLocation();
+	bIsLaunchReady = false;
+
+	FVector spawnLocation = GetActorLocation() + FVector::UpVector * 100.0f;
 	FRotator spawnRotation = FRotator::ZeroRotator;
 	FActorSpawnParameters spawnParams;
 	spawnParams.Instigator = this;
@@ -72,7 +75,12 @@ AAircraft* AAirbase::LaunchAircraft(TSubclassOf<AAircraft> aircraftType)
 		launchCooldownTime
 	);
 
-	
+	AAircraftController* controller = aircraft->GetController<AAircraftController>();
+	if (ensure(controller))
+	{
+		controller->SetHomeBase(this);
+	}
+
 	return aircraft;
 }
 

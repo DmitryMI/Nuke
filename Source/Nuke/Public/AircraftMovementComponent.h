@@ -26,7 +26,10 @@ private:
 	FVector2D pitchMinMax = FVector2D(-45, 45);
 
 	UPROPERTY(EditDefaultsOnly)
-	float acceleration = 500.0f;
+	float acceleration = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float deceleration = 200.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 	FVector2D speedMinMax = FVector2D(500, 1500);
@@ -82,6 +85,8 @@ public:
 	float GetCurrentSpeed() const;
 
 	void FreezeMovement();
+
+	virtual float GetMaxSpeed() const override;
 };
 
 template<typename T>

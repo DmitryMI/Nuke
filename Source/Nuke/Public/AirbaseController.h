@@ -14,4 +14,11 @@ class NUKE_API AAirbaseController : public AAIController
 {
 	GENERATED_BODY()
 	
+public:
+	UFUNCTION(BlueprintCallable)
+	void ScoutLocation(const FVector& location);
+
+	virtual void SetGenericTeamId(const FGenericTeamId& team) override;
+
+	virtual  FGenericTeamId GetGenericTeamId() const override;
 };

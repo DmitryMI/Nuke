@@ -7,6 +7,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "BallisticMovementComponent.h"
 #include "AircraftWaypoint.h"
+#include "City.h"
 #include "AIUtils.generated.h"
 
 /**
@@ -52,4 +53,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	static TArray<FAircraftWaypoint> GenerateRandomAircraftPath(FVector startingLocation, float segmentLength = 5000.0f, int points = 10, FVector2D altitudeRange = FVector2D(1000.0f, 5000.0f));
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static TArray<AActor*> GetEnemyCities(AActor* teamAgentActor);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static AActor* GetRandomActor(const TArray<AActor*>& actors);
 };

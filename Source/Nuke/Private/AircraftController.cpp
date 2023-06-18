@@ -5,6 +5,16 @@
 #include "Aircraft.h"
 #include "AircraftMovementComponent.h"
 
+bool AAircraftController::HasValidPath() const
+{
+	if (FollowedPath.Num() == 0)
+	{
+		return false;
+	}
+
+	return FollowedPathWaypointIndex < FollowedPath.Num();
+}
+
 bool AAircraftController::IsNearNextWaypoint() const
 {
 	if (FollowedPath.Num() == 0)
@@ -99,8 +109,67 @@ void AAircraftController::DrawFollowedPath(float lineLifetime) const
 		FVector end = FollowedPath[i + 1].Location;
 
 		DrawDebugLine(GetWorld(), start, end, FColor::Red, persistentLines, lineLifetime);
-		DrawDebugSphere(GetWorld(), end, PathFollowingTolerance, 8, FColor::Red, persistentLines, lineLifetime);
+		DrawDebugSphere(GetWorld(), end, PathFollowingTolerance, sphereSegments, FColor::Red, persistentLines, lineLifetime);
 	}
 }
-
 #endif
+
+
+AAirbase* AAircraftController::GetHomeBase() const
+{
+	return homeBase;
+}
+
+void AAircraftController::SetHomeBase(AAirbase* airbase)
+{
+	homeBase = airbase;
+}
+
+void AAircraftController::ScoutLocation(const FVector& location)
+{
+	AAircraft* aircraft = GetPawn<AAircraft>();
+	check(aircraft);
+
+	UAircraftMovementComponent* movement = aircraft->GetAircraftMovementComponent();
+	float maxSpeed = movement->GetMaxSpeed();
+
+	TArray<FAircraftWaypoint> pathToLocation;
+
+	FVector direction = location - aircraft->GetActorLocation();
+	float distance = direction.Size();
+	float intermediateDistance = FMath::Min(3000.0f, distance / 2.0f);
+
+	direction /= distance;
+	FVector intermediatePoint = aircraft->GetActorLocation() + direction * 3000.0f;
+	intermediatePoint.Z = location.Z;
+
+	pathToLocation.Add(FAircraftWaypoint(intermediatePoint, maxSpeed));
+	pathToLocation.Add(FAircraftWaypoint(location, maxSpeed));
+
+	SetFollowedPath(pathToLocation);
+}
+
+void AAircraftController::SetGenericTeamId(const FGenericTeamId& team)
+{
+	APawn* pawn = GetPawn();
+	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(pawn);
+	if (teamAgent)
+	{
+		teamAgent->SetGenericTeamId(team);
+	}
+	
+	Super::SetGenericTeamId(team);
+}
+
+FGenericTeamId AAircraftController::GetGenericTeamId() const
+{
+	APawn* pawn = GetPawn();
+	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(pawn);
+	if (teamAgent)
+	{
+		return teamAgent->GetGenericTeamId();
+	}
+
+	return Super::GetGenericTeamId();
+}
+

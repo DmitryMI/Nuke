@@ -7,6 +7,8 @@
 #include "AircraftWaypoint.h"
 #include "AircraftController.generated.h"
 
+class AAirbase;
+
 /**
  * 
  */
@@ -26,7 +28,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int FollowedPathWaypointIndex = 0;
 
+	UPROPERTY(VisibleAnywhere)
+	AAirbase* homeBase = nullptr;
+
 public:
+	UFUNCTION(BlueprintCallable)
+	bool HasValidPath() const;
+
 	UFUNCTION(BlueprintCallable)
 	bool IsNearNextWaypoint() const;
 
@@ -45,4 +53,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DrawFollowedPath(float lineLifetime = -1) const;
 #endif
+
+	UFUNCTION(BlueprintCallable)
+	AAirbase* GetHomeBase() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetHomeBase(AAirbase* airbase);
+
+	UFUNCTION(BlueprintCallable)
+	void ScoutLocation(const FVector& location);
+
+	virtual void SetGenericTeamId(const FGenericTeamId& team) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
 };
