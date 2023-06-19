@@ -30,7 +30,7 @@ private:
 	float antiAirMissileCooldown= 1.0f;
 
 	UPROPERTY(EditDefaultsOnly)
-	float radarRange = 20000.0f;
+	float radarRange = 50000.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 	float radarConeAngle = 45.0f;

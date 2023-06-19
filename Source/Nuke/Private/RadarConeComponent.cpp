@@ -60,6 +60,7 @@ void URadarConeComponent::BeginPlay()
 void URadarConeComponent::SetRadarRange(float radarRadius)
 {
 	range = radarRadius;
+	sphereCollision->SetSphereRadius(range);
 }
 
 void URadarConeComponent::SetConeAngleDeg(float angleDeg)
