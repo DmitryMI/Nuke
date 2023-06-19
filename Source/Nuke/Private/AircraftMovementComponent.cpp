@@ -64,7 +64,7 @@ void UAircraftMovementComponent::UpdateActorRotation(const FRotator& toRotation,
 	GetOwner()->SetActorRotation(nextRotation);
 }
 
-FRotator UAircraftMovementComponent::RotateTowardsTarget(float DeltaTime)
+FRotator UAircraftMovementComponent::CalculateRotationTowardsTarget(float DeltaTime)
 {
 	FRotator rotation = Velocity.Rotation();
 	float pitchAngleDelta = FMath::FindDeltaAngleDegrees(rotation.Pitch, requestedRotation.Pitch);
@@ -148,7 +148,7 @@ void UAircraftMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 				if (FMath::Abs(yawStep) < minAngularStep)
 				{
 					float yawStepAbs = FMath::Min(FMath::Abs(yawDelta), minAngularStep);
-					yawStep = FMath::Sign(yawStep) * minAngularStep;
+					yawStep = FMath::Sign(yawStep) * yawStepAbs;
 				}				
 				requestedRotation.Yaw = velocityRotator.Yaw + yawStep;
 			}
@@ -184,7 +184,7 @@ void UAircraftMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 				if (FMath::Abs(pitchStep) < minAngularStep)
 				{
 					float pitchStepAbs = FMath::Min(FMath::Abs(pitchDelta), minAngularStep);
-					pitchStep = FMath::Sign(pitchStep) * minAngularStep;
+					pitchStep = FMath::Sign(pitchStep) * pitchStepAbs;
 				}
 				requestedRotation.Pitch = velocityRotator.Pitch + pitchStep;
 			}
@@ -199,7 +199,7 @@ void UAircraftMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 		requestedRotation.Pitch = FMath::Clamp(requestedRotation.Pitch, pitchMinMax.X, pitchMinMax.Y);
 	}
 
-	FRotator rotation = RotateTowardsTarget(DeltaTime);
+	FRotator rotation = CalculateRotationTowardsTarget(DeltaTime);
 	UpdateActorRotation(rotation, DeltaTime);
 	UpdateMovementSpeed(DeltaTime);
 

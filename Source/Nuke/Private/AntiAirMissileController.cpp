@@ -44,7 +44,10 @@ void AAntiAirMissileController::FlyTowardsLinearInterceptionLocation()
 	float maxSpeed = guidedMissileMovement->GetMaxSpeed();
 	FVector targetLocation = target->GetActorLocation();
 
-	DrawDebugLine(GetWorld(), GetPawn()->GetActorLocation(), targetLocation, FColor::Red, false);
+	if (IsSelectedInEditor() || GetPawn()->IsSelectedInEditor())
+	{
+		DrawDebugLine(GetWorld(), GetPawn()->GetActorLocation(), targetLocation, FColor::Red, false);
+	}
 
 	UMovementComponent* targetMovementComponent = target->FindComponentByClass<UMovementComponent>();
 	FVector targetVelocity = targetMovementComponent->Velocity / GetWorld()->DeltaTimeSeconds;
@@ -58,12 +61,16 @@ void AAntiAirMissileController::FlyTowardsLinearInterceptionLocation()
 
 	if (ok)
 	{
-		DrawDebugLine(GetWorld(), GetPawn()->GetActorLocation(), outPoint, FColor::Green, false);
-
+		if (IsSelectedInEditor() || GetPawn()->IsSelectedInEditor())
+		{
+			DrawDebugLine(GetWorld(), GetPawn()->GetActorLocation(), outPoint, FColor::Green, false);
+		}
+		
 		FlyTowardsLocation(outPoint);
 	}
 	else
 	{
+
 		FlyTowardsTargetActor();
 	}
 }

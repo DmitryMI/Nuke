@@ -70,7 +70,7 @@ protected:
 
 	void UpdateActorRotation(const FRotator& toRotation, float DeltaTime);
 
-	FRotator RotateTowardsTarget(float DeltaTime);
+	FRotator CalculateRotationTowardsTarget(float DeltaTime);
 
 	template<typename T>
 	T ClampAbs(const T& value, const T& absLimit);
