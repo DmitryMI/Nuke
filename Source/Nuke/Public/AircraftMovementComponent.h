@@ -86,6 +86,9 @@ public:
 
 	void RequestFlyTowardsWaypoint(const FAircraftWaypoint& waypoint);
 
+	UFUNCTION(BlueprintCallable)
+	void RequestFollowActor(AActor* actor);
+
 	bool GetRequestedWaypoint(FAircraftWaypoint& outWaypoint) const;
 
 	float GetCurrentSpeed() const;

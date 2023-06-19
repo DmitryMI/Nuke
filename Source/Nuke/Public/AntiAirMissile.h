@@ -65,4 +65,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsTargetTrackedByMissileOrInstigator() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetCurrentSpeed(float speed);
 };

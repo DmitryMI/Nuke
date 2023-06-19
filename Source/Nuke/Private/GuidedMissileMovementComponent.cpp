@@ -143,3 +143,9 @@ float UGuidedMissileMovementComponent::GetAcceleration() const
 {
 	return acceleration;
 }
+
+void UGuidedMissileMovementComponent::SetCurrentSpeed(float speed)
+{
+	currentSpeed = speed;
+	currentSpeed = FMath::Clamp(currentSpeed, 0.0, maxSpeed);
+}

@@ -308,3 +308,13 @@ bool UAIUtils::IsActorTrackedByRadar(AActor* radarActor, AActor* trackableActor)
 	IRadar* radar = Cast<IRadar>(radarActor);
 	return radar->IsActorTrackedByRadar(trackableActor);
 }
+
+bool UAIUtils::GetTrackedThreatsByRadar(AActor* radarActor, TArray<AActor*>& outTrackedThreats)
+{
+	IRadar* radar = Cast<IRadar>(radarActor);
+	if (!radar)
+	{
+		return false;
+	}
+	return radar->GetTrackedThreats(outTrackedThreats);
+}

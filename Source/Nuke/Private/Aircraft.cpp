@@ -200,3 +200,8 @@ bool AAircraft::IsActorTrackedByRadar(AActor* actor) const
 
 	return false;
 }
+
+EMobilityEnvironmentType AAircraft::GetMobilityEnvironmentType() const
+{
+	return EMobilityEnvironmentType::MET_Air;
+}

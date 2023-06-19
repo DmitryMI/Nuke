@@ -24,11 +24,13 @@ bool URadarConeComponent::IsActorTrackedByRadar(AActor* actor) const
 	}
 	else
 	{
-		direction.Normalize();
-		FVector fwdVector = GetForwardVector();
-		float dot = direction.Dot(fwdVector);
+		FRotator rotation = GetComponentRotation();
+		FRotator angleToActor = direction.Rotation();
 
-		isInsideCone = dot >= coneAngleCos;
+		// Incorrect, but fast
+		double yawDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Yaw, angleToActor.Yaw);
+		double pitchDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Pitch, angleToActor.Pitch);
+		isInsideCone = FMath::Abs(yawDeltaAngleDeg) <= coneAngleDeg && FMath::Abs(pitchDeltaAngleDeg) < coneAngleDeg;
 	}
 
 	if (!isInsideCone)

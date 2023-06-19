@@ -40,6 +40,11 @@ void AAntiAirMissileController::FlyTowardsTargetActor()
 
 void AAntiAirMissileController::FlyTowardsLinearInterceptionLocation()
 {
+	if (!GetPawn())
+	{
+		return;
+	}
+
 	UGuidedMissileMovementComponent* guidedMissileMovement = GetGuidedMovementComponent();
 	float maxSpeed = guidedMissileMovement->GetMaxSpeed();
 	FVector targetLocation = target->GetActorLocation();
@@ -50,8 +55,15 @@ void AAntiAirMissileController::FlyTowardsLinearInterceptionLocation()
 	}
 
 	UMovementComponent* targetMovementComponent = target->FindComponentByClass<UMovementComponent>();
+	if (targetMovementComponent == nullptr)
+	{
+		FlyTowardsTargetActor();
+		return;
+	}
+
 	FVector targetVelocity = targetMovementComponent->Velocity / GetWorld()->DeltaTimeSeconds;
 	FVector outPoint;
+	
 	bool ok = UAIUtils::CalculateInterceptionLinear(
 		targetLocation,
 		targetVelocity,

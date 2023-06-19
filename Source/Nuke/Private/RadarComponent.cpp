@@ -149,6 +149,14 @@ bool URadarComponent::EvaluateTrackingConditions(AActor* actor) const
 		return false;
 	}
 
+	if (detectableMobilityType != EMobilityEnvironmentType::MET_None)
+	{
+		if (attackable->GetMobilityEnvironmentType() != detectableMobilityType)
+		{
+			return false;
+		}
+	}
+
 	TArray<FHitResult> hitResults;
 	FVector traceStart = GetOwner()->GetActorLocation() + GetRelativeLocation();
 	FVector traceEnd = actor->GetActorLocation();
@@ -217,4 +225,15 @@ bool URadarComponent::IsActorTrackedByRadar(AActor* actor) const
 
 	return EvaluateTrackingConditions(actor);
 }
+
+EMobilityEnvironmentType URadarComponent::GetDetectableMobilityType() const
+{
+	return detectableMobilityType;
+}
+
+void URadarComponent::SetDetectableMobilityType(EMobilityEnvironmentType mobilityType)
+{
+	detectableMobilityType = mobilityType;
+}
+
 

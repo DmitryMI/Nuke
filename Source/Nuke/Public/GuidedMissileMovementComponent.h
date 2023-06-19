@@ -66,4 +66,6 @@ public:
 	float GetMaxSpeed() const;
 
 	float GetAcceleration() const;
+
+	void SetCurrentSpeed(float speed);
 };

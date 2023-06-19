@@ -27,17 +27,44 @@ private:
 	int antiAirMissileNumber = 6;
 
 	UPROPERTY(EditDefaultsOnly)
-	float radarRange = 10000.0f;
+	float antiAirMissileCooldown= 1.0f;
 
 	UPROPERTY(EditDefaultsOnly)
-	float radarConeAngle = 30.0f;
+	float radarRange = 20000.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float radarConeAngle = 45.0f;
 
 	UPROPERTY(EditAnywhere)
 	URadarConeComponent* fighterRadar;
 
+	UPROPERTY(VisibleAnywhere)
+	bool bIsAntiAirMissileReady = true;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<AAntiAirMissile*> managedAntiAirMissiles;
+
+	UPROPERTY()
+	FTimerHandle antiAirMissileCooldownHandle;
+
+	UFUNCTION()
+	void OnAntiAirMissileCooldownExpired();
+
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void OnManagedMissileDestroyed(AMissile* sender);
 public:
 	AFighter();
+
+	UFUNCTION(BlueprintCallable)
+	AAntiAirMissile* LaunchAntiAirMissile(AActor* shootTarget);
+
+	const TArray<AAntiAirMissile*>& GetManagedAntiAirMissiles() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsAntiAirMissileReady() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool HasAntiAirMissiles() const;
 };

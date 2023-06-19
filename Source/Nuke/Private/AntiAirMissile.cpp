@@ -125,7 +125,7 @@ bool AAntiAirMissile::IsActorTrackedByRadar(AActor* actor) const
 	double yawDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Yaw, angleToActor.Yaw);
 	double pitchDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Pitch, angleToActor.Pitch);
 
-	return yawDeltaAngleDeg <= radarConeAngle && pitchDeltaAngleDeg < radarConeAngle;
+	return FMath::Abs(yawDeltaAngleDeg) <= radarConeAngle && FMath::Abs(pitchDeltaAngleDeg) < radarConeAngle;
 }
 
 bool AAntiAirMissile::IsTargetTrackedByMissileOrInstigator() const
@@ -149,4 +149,9 @@ bool AAntiAirMissile::IsTargetTrackedByMissileOrInstigator() const
 	}
 
 	return instigatorRadar->IsActorTrackedByRadar(target);
+}
+
+void AAntiAirMissile::SetCurrentSpeed(float speed)
+{
+	guidedMovement->SetCurrentSpeed(speed);
 }

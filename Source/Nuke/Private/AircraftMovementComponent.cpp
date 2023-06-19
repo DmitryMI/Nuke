@@ -218,6 +218,19 @@ void UAircraftMovementComponent::RequestFlyTowardsWaypoint(const FAircraftWaypoi
 	requestedWaypoint = waypoint;
 }
 
+void UAircraftMovementComponent::RequestFollowActor(AActor* actor)
+{
+	if (!actor)
+	{
+		return;
+	}
+
+	bNavigateToWaypoint = false;
+	FVector direction = actor->GetActorLocation() - GetOwner()->GetActorLocation();
+	FRotator rotationTowardsDirection = direction.Rotation();
+	requestedRotation = rotationTowardsDirection;
+}
+
 bool UAircraftMovementComponent::GetRequestedWaypoint(FAircraftWaypoint& outWaypoint) const
 {
 	outWaypoint = requestedWaypoint;

@@ -103,7 +103,7 @@ public:
 	void SetTargetAndLaunchLocation(const FVector& target, const FVector& start);
 
 	UFUNCTION(BlueprintCallable)
-	bool IsAlive() const;
+	virtual bool IsAlive() const override;
 
 	UFUNCTION(BlueprintCallable)
 	bool PredictLocation(float time, FVector& outLocation) const;

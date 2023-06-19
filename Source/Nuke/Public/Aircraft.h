@@ -84,6 +84,7 @@ public:
 
 	FGenericTeamId GetGenericTeamId() const override;
 
+	UFUNCTION(BlueprintCallable)
 	UAircraftMovementComponent* GetAircraftMovementComponent() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -100,4 +101,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
+
+	virtual EMobilityEnvironmentType GetMobilityEnvironmentType() const override;
 };

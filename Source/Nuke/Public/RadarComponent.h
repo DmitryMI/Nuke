@@ -6,6 +6,7 @@
 #include "Components/SceneComponent.h"
 #include "GenericTeamAgentInterface.h"
 #include "Radar.h"
+#include "MobilityEnvironmentType.h"
 #include "RadarComponent.generated.h"
 
 
@@ -17,6 +18,10 @@ class NUKE_API URadarComponent : public USceneComponent, public IGenericTeamAgen
 private:
 	UPROPERTY(VisibleAnywhere)
 	TArray<AActor*> threatsInRadarRange;
+
+	UPROPERTY(EditAnywhere)
+	EMobilityEnvironmentType detectableMobilityType = EMobilityEnvironmentType::MET_None;
+
 public:	
 	// Sets default values for this component's properties
 	URadarComponent();
@@ -55,4 +60,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual EMobilityEnvironmentType GetDetectableMobilityType() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetDetectableMobilityType(EMobilityEnvironmentType mobilityType);
 };

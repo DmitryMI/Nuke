@@ -62,4 +62,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	static bool IsActorTrackedByRadar(AActor* radarActor, AActor* trackableActor);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static bool GetTrackedThreatsByRadar(AActor* radarActor, TArray<AActor*>& outTrackedThreats);
 };
