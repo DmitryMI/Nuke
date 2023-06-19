@@ -50,6 +50,11 @@ void AAirDefence::BeginPlay()
 	{
 		missile->OnMissileDestroyed().AddUObject(this, &AAirDefence::OnManagedMissileDestroyed);
 	}
+
+	if (!radarComponent)
+	{
+		radarComponent = GetComponentByClass<URadarSphereComponent>();
+	}
 }
 
 AActor* AAirDefence::Shoot(AActor* target)
@@ -148,9 +153,22 @@ bool AAirDefence::IsWeaponReady() const
 	return bIsWeaponReady;
 }
 
-TArray<AActor*> AAirDefence::GetTrackedEnemies() const
+bool AAirDefence::GetTrackedThreats(TArray<AActor*>& outThreats) const
 {
-	return radarComponent->GetTrackedThreatsArray();
+	if (!radarComponent)
+	{
+		return false;
+	}
+	return radarComponent->GetTrackedThreats(outThreats);
+}
+
+bool AAirDefence::IsActorTrackedByRadar(AActor* actor) const
+{
+	if (!radarComponent)
+	{
+		return false;
+	}
+	return radarComponent->IsActorTrackedByRadar(actor);
 }
 
 float AAirDefence::GetWeaponMaxSpeed() const

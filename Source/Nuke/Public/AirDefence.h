@@ -6,10 +6,11 @@
 #include "RadarSphereComponent.h"
 #include "AntiAirMissile.h"
 #include "Attackable.h"
+#include "Radar.h"
 #include "AirDefence.generated.h"
 
 UCLASS()
-class NUKE_API AAirDefence : public APawn, public IGenericTeamAgentInterface, public IAttackable
+class NUKE_API AAirDefence : public APawn, public IGenericTeamAgentInterface, public IAttackable, public IRadar
 {
 	GENERATED_BODY()
 
@@ -93,7 +94,9 @@ public:
 	bool IsWeaponReady() const;
 
 	UFUNCTION(BlueprintCallable)
-	TArray<AActor*> GetTrackedEnemies() const;
+	virtual bool GetTrackedThreats(TArray<AActor*>& outThreats) const;
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsActorTrackedByRadar(AActor* actor) const;
 
 	UFUNCTION(BlueprintCallable)
 	float GetWeaponMaxSpeed() const;

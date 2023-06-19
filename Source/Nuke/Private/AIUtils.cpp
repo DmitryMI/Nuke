@@ -3,6 +3,7 @@
 
 #include "AIUtils.h"
 #include "Attackable.h"
+#include "Radar.h"
 #include "Kismet/GameplayStatics.h"
 
 bool UAIUtils::AreEnemies(AActor* actor1, AActor* actor2)
@@ -300,4 +301,10 @@ AActor* UAIUtils::GetRandomActor(const TArray<AActor*>& actors)
 
 	int index = FMath::RandRange(0, actors.Num() - 1);
 	return actors[index];
+}
+
+bool UAIUtils::IsActorTrackedByRadar(AActor* radarActor, AActor* trackableActor)
+{
+	IRadar* radar = Cast<IRadar>(radarActor);
+	return radar->IsActorTrackedByRadar(trackableActor);
 }

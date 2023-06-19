@@ -125,10 +125,9 @@ UAircraftMovementComponent* AAircraft::GetAircraftMovementComponent() const
 	return aircraftMovement;
 }
 
-TArray<AActor*> AAircraft::GetTrackedThreats() const
+TArray<AActor*> AAircraft::GetTrackedThreatsArray() const
 {
 	TInlineComponentArray<URadarComponent*> radarComponents;
-	//TArray<UActorComponent*> radarComponents = GetComponentsByClass(URadarComponent::StaticClass());
 	GetComponents(radarComponents);
 
 	TArray<AActor*> trackedThreats;
@@ -139,6 +138,19 @@ TArray<AActor*> AAircraft::GetTrackedThreats() const
 	}
 
 	return trackedThreats;
+}
+
+bool AAircraft::GetTrackedThreats(TArray<AActor*>& outThreats) const
+{
+	TInlineComponentArray<URadarComponent*> radarComponents;
+	GetComponents(radarComponents);
+
+	for (URadarComponent* radar : radarComponents)
+	{
+		radar->GetTrackedThreats(outThreats);
+	}
+
+	return outThreats.Num() > 0;
 }
 
 bool AAircraft::CanLandOnBase(AAirbase* airbase) const
@@ -171,4 +183,20 @@ void AAircraft::LandOnBase(AAirbase* airbase)
 		DestroyDelayed();
 		airbase->SetNumberOfFighters(airbase->GetNumberOfFighters() + 1);
 	}
+}
+
+bool AAircraft::IsActorTrackedByRadar(AActor* actor) const
+{
+	TInlineComponentArray<URadarComponent*> radarComponents;
+	GetComponents(radarComponents);
+
+	for (URadarComponent* radar : radarComponents)
+	{
+		if (radar->IsActorTrackedByRadar(actor))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

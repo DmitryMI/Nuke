@@ -9,17 +9,24 @@
 #include "Components/SphereComponent.h"
 #include "GuidedMissileMovementComponent.h"
 #include "Explosion.h"
+#include "Radar.h"
 #include "AntiAirMissile.generated.h"
 
 
 UCLASS()
-class NUKE_API AAntiAirMissile : public AMissile
+class NUKE_API AAntiAirMissile : public AMissile, public IRadar
 {
 	GENERATED_BODY()
 
 private:
 	UPROPERTY(EditAnywhere)
 	UGuidedMissileMovementComponent* guidedMovement;
+
+	UPROPERTY(EditDefaultsOnly)
+	double radarRange = 10000.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	double radarConeAngle = 80.0f;
 
 public:
 	// Sets default values for this pawn's properties
@@ -52,4 +59,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetAcceleration() const;
+
+	virtual bool GetTrackedThreats(TArray<AActor*>& outThreats) const override;
+	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsTargetTrackedByMissileOrInstigator() const;
 };

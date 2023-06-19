@@ -8,12 +8,13 @@
 #include "Components/CapsuleComponent.h"
 #include "AircraftMovementComponent.h"
 #include "GenericTeamAgentInterface.h"
+#include "Radar.h"
 #include "Aircraft.generated.h"
 
 class AAirbase;
 
 UCLASS()
-class NUKE_API AAircraft : public APawn, public IAttackable, public IGenericTeamAgentInterface
+class NUKE_API AAircraft : public APawn, public IAttackable, public IGenericTeamAgentInterface, public IRadar
 {
 	GENERATED_BODY()
 
@@ -86,11 +87,17 @@ public:
 	UAircraftMovementComponent* GetAircraftMovementComponent() const;
 
 	UFUNCTION(BlueprintCallable)
-	virtual TArray<AActor*> GetTrackedThreats() const;
+	virtual TArray<AActor*> GetTrackedThreatsArray() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool GetTrackedThreats(TArray<AActor*>& outThreats) const override;
 
 	UFUNCTION(BlueprintCallable)
 	bool CanLandOnBase(AAirbase* airbase) const;
 
 	UFUNCTION(BlueprintCallable)
 	void LandOnBase(AAirbase* airbase);
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
 };

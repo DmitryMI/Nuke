@@ -139,7 +139,7 @@ void URadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 	}
 }
 
-bool URadarComponent::IsTracked(AActor* actor) const
+bool URadarComponent::EvaluateTrackingConditions(AActor* actor) const
 {
 	IAttackable* attackable = Cast<IAttackable>(actor);
 	check(attackable);
@@ -184,7 +184,7 @@ bool URadarComponent::GetTrackedThreats(TArray<AActor*>& outThreats) const
 {
 	for (AActor* actor : threatsInRadarRange)
 	{
-		if (!IsTracked(actor))
+		if (!EvaluateTrackingConditions(actor))
 		{
 			continue;
 		}
@@ -206,5 +206,15 @@ FGenericTeamId URadarComponent::GetGenericTeamId() const
 	IGenericTeamAgentInterface* ownerTeamAgent = Cast<IGenericTeamAgentInterface>(GetOwner());
 	check(ownerTeamAgent);
 	return ownerTeamAgent->GetGenericTeamId();
+}
+
+bool URadarComponent::IsActorTrackedByRadar(AActor* actor) const
+{
+	if (!threatsInRadarRange.Contains(actor))
+	{
+		return false;
+	}
+
+	return EvaluateTrackingConditions(actor);
 }
 

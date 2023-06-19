@@ -59,4 +59,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	static AActor* GetRandomActor(const TArray<AActor*>& actors);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static bool IsActorTrackedByRadar(AActor* radarActor, AActor* trackableActor);
 };

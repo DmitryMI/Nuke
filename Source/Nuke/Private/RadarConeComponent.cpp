@@ -13,7 +13,7 @@ void URadarConeComponent::PostEditChangeProperty(struct FPropertyChangedEvent& P
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
-bool URadarConeComponent::IsTracked(AActor* actor) const
+bool URadarConeComponent::IsActorTrackedByRadar(AActor* actor) const
 {
 	bool isInsideCone = false;
 
@@ -36,7 +36,7 @@ bool URadarConeComponent::IsTracked(AActor* actor) const
 		return false;
 	}
 
-	return Super::IsTracked(actor);
+	return Super::EvaluateTrackingConditions(actor);
 }
 void URadarConeComponent::BeginPlay()
 {

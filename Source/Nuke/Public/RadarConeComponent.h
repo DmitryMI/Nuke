@@ -33,7 +33,7 @@ protected:
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
-	virtual bool IsTracked(AActor* actor) const override;
+	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
 
 	virtual void BeginPlay() override;
 public:

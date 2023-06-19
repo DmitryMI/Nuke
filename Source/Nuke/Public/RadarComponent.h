@@ -5,11 +5,12 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "GenericTeamAgentInterface.h"
+#include "Radar.h"
 #include "RadarComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class NUKE_API URadarComponent : public USceneComponent, public IGenericTeamAgentInterface
+class NUKE_API URadarComponent : public USceneComponent, public IGenericTeamAgentInterface, public IRadar
 {
 	GENERATED_BODY()
 
@@ -36,7 +37,7 @@ protected:
 	UFUNCTION()
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	virtual bool IsTracked(AActor* actor) const;
+	virtual bool EvaluateTrackingConditions(AActor* actor) const;
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -44,11 +45,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual TArray<AActor*> GetTrackedThreatsArray() const;
 
-	virtual bool GetTrackedThreats(TArray<AActor*>& outThreats) const;
+	virtual bool GetTrackedThreats(TArray<AActor*>& outThreats) const override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetGenericTeamId(const FGenericTeamId& team);
 
 	UFUNCTION(BlueprintCallable)
 	virtual FGenericTeamId GetGenericTeamId() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
 };

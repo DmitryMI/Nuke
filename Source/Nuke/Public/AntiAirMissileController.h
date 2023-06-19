@@ -44,4 +44,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetRendezvousLocation(const FVector& location);
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsTargetTrackedByMissileOrInstigator() const;
 };

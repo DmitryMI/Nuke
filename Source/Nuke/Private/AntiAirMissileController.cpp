@@ -97,3 +97,11 @@ void AAntiAirMissileController::SetRendezvousLocation(const FVector& location)
 	GetBlackboardComponent()->SetValueAsVector("RendezvousLocation", location);
 	GetBlackboardComponent()->SetValueAsBool("HasRendezvousLocation", true);
 }
+
+bool AAntiAirMissileController::IsTargetTrackedByMissileOrInstigator() const
+{
+	AAntiAirMissile* missile = Cast<AAntiAirMissile>(GetPawn());
+	check(missile);
+
+	return missile->IsTargetTrackedByMissileOrInstigator();
+}
