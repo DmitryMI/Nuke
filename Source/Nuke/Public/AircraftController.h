@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "AircraftWaypoint.h"
+#include "AirPath.h"
 #include "AircraftController.generated.h"
 
 class AAirbase;
@@ -17,19 +18,17 @@ class NUKE_API AAircraftController : public AAIController
 {
 	GENERATED_BODY()
 	
+private:
+	UPROPERTY(EditDefaultsOnly)
+	float pathToleranceDefault = 500.0f;
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float PathFollowingTolerance = 500.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FAircraftWaypoint> FollowedPath;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int FollowedPathWaypointIndex = 0;
+	UAirPath* FollowedAirPath;
 
 	UPROPERTY(VisibleAnywhere)
-	AAirbase* homeBase = nullptr;
+	AAirbase* HomeBase = nullptr;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -39,13 +38,10 @@ public:
 	bool IsNearNextWaypoint() const;
 
 	UFUNCTION(BlueprintCallable)
-	bool SetFollowedPath(const TArray<FAircraftWaypoint>& path);
+	void SetFollowedPath(UAirPath* path);
 	
 	UFUNCTION(BlueprintCallable)
 	bool FollowNextWaypoint();
-
-	UFUNCTION(BlueprintCallable)
-	void MarkNextWaypointAsReached();
 
 	void Tick(float DeltaTime) override;
 
@@ -60,9 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetHomeBase(AAirbase* airbase);
 
-	UFUNCTION(BlueprintCallable)
-	void ScoutLocation(const FVector& location);
-
 	virtual void SetGenericTeamId(const FGenericTeamId& team) override;
 	virtual FGenericTeamId GetGenericTeamId() const override;
+
+	UFUNCTION(BlueprintCallable)
+	void MakePathToLocationAndFollow(const FVector& location);
 };

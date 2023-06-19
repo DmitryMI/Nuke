@@ -2,6 +2,8 @@
 
 
 #include "Aircraft.h"
+#include "RadarComponent.h"
+#include "AirBase.h"
 
 #if WITH_EDITOR  
 
@@ -123,3 +125,50 @@ UAircraftMovementComponent* AAircraft::GetAircraftMovementComponent() const
 	return aircraftMovement;
 }
 
+TArray<AActor*> AAircraft::GetTrackedThreats() const
+{
+	TInlineComponentArray<URadarComponent*> radarComponents;
+	//TArray<UActorComponent*> radarComponents = GetComponentsByClass(URadarComponent::StaticClass());
+	GetComponents(radarComponents);
+
+	TArray<AActor*> trackedThreats;
+
+	for (URadarComponent* radar : radarComponents)
+	{
+		radar->GetTrackedThreats(trackedThreats);
+	}
+
+	return trackedThreats;
+}
+
+bool AAircraft::CanLandOnBase(AAirbase* airbase) const
+{
+	if (!airbase || !airbase->IsAlive())
+	{
+		return false;
+	}
+
+	if (!bIsAlive)
+	{
+		return false;
+	}
+
+	if (FGenericTeamId::GetAttitude(airbase->GetGenericTeamId(), GetGenericTeamId()) != ETeamAttitude::Friendly)
+	{
+		return false;
+	}
+
+	FVector baseLocation = airbase->GetActorLocation();
+	FVector aircraftLocation = GetActorLocation();
+
+	return (baseLocation - aircraftLocation).SizeSquared() <= landingDistance * landingDistance;
+}
+
+void AAircraft::LandOnBase(AAirbase* airbase)
+{
+	if (CanLandOnBase(airbase))
+	{
+		DestroyDelayed();
+		airbase->SetNumberOfFighters(airbase->GetNumberOfFighters() + 1);
+	}
+}

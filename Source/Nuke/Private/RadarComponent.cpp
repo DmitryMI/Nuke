@@ -173,9 +173,15 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	// ...
 }
 
-TArray<AActor*> URadarComponent::GetTrackedThreats() const
+TArray<AActor*> URadarComponent::GetTrackedThreatsArray() const
 {
 	TArray<AActor*> trackedEnemies;
+	GetTrackedThreats(trackedEnemies);
+	return trackedEnemies;
+}
+
+bool URadarComponent::GetTrackedThreats(TArray<AActor*>& outThreats) const
+{
 	for (AActor* actor : threatsInRadarRange)
 	{
 		if (!IsTracked(actor))
@@ -183,9 +189,9 @@ TArray<AActor*> URadarComponent::GetTrackedThreats() const
 			continue;
 		}
 
-		trackedEnemies.Add(actor);
+		outThreats.Add(actor);
 	}
-	return trackedEnemies;
+	return outThreats.Num() > 0;
 }
 
 void URadarComponent::SetGenericTeamId(const FGenericTeamId& team)

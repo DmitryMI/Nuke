@@ -47,7 +47,7 @@ private:
 	FRotator requestedRotation;
 
 	UPROPERTY(VisibleAnywhere)
-	float requestedSpeed = 1500;
+	float requestedSpeed = 2000;
 
 	UPROPERTY(VisibleAnywhere)
 	FAircraftWaypoint requestedWaypoint;

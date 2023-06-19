@@ -26,6 +26,9 @@ class NUKE_API AAirbase : public APawn, public IAttackable, public IGenericTeamA
 	UPROPERTY(EditAnywhere)
 	FGenericTeamId teamId;
 
+	UPROPERTY(VisibleAnywhere)
+	bool bIsAlive = true;
+
 	UPROPERTY()
 	bool bIsLaunchReady = true;
 
@@ -57,9 +60,14 @@ public:
 	int GetNumberOfFighters() const;
 
 	UFUNCTION(BlueprintCallable)
+	void SetNumberOfFighters(int number);
+
+	UFUNCTION(BlueprintCallable)
 	FGenericTeamId GetGenericTeamId() const override;
 
 	UFUNCTION(BlueprintCallable)
 	void SetGenericTeamId(const FGenericTeamId& team) override;
+
+	virtual bool IsAlive() const override;
 
 };

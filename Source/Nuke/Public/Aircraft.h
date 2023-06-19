@@ -10,6 +10,8 @@
 #include "GenericTeamAgentInterface.h"
 #include "Aircraft.generated.h"
 
+class AAirbase;
+
 UCLASS()
 class NUKE_API AAircraft : public APawn, public IAttackable, public IGenericTeamAgentInterface
 {
@@ -33,6 +35,9 @@ private:
 	float bodyLength = 20.0f;
 	UPROPERTY(EditDefaultsOnly)
 	float bodyRadius = 5.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float landingDistance = 100.0f;
 
 	UPROPERTY(EditAnywhere)
 	UCapsuleComponent* bodyCollider;
@@ -79,4 +84,13 @@ public:
 	FGenericTeamId GetGenericTeamId() const override;
 
 	UAircraftMovementComponent* GetAircraftMovementComponent() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual TArray<AActor*> GetTrackedThreats() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool CanLandOnBase(AAirbase* airbase) const;
+
+	UFUNCTION(BlueprintCallable)
+	void LandOnBase(AAirbase* airbase);
 };

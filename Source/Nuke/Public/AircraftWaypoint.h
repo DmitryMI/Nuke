@@ -17,6 +17,9 @@ public:
     UPROPERTY(EditAnywhere)
     float Speed;
 
+    UPROPERTY(EditAnywhere)
+    float Tolerance = 500.0f;
+
     FAircraftWaypoint();
 
     FAircraftWaypoint(const FVector& location, float speed);

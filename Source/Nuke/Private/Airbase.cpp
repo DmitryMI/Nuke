@@ -89,6 +89,11 @@ int AAirbase::GetNumberOfFighters() const
 	return fightersNumber;
 }
 
+void AAirbase::SetNumberOfFighters(int number)
+{
+	fightersNumber = number;
+}
+
 FGenericTeamId AAirbase::GetGenericTeamId() const
 {
 	return teamId;
@@ -97,6 +102,11 @@ FGenericTeamId AAirbase::GetGenericTeamId() const
 void AAirbase::SetGenericTeamId(const FGenericTeamId& team)
 {
 	teamId = team;
+}
+
+bool AAirbase::IsAlive() const
+{
+	return bIsAlive;
 }
 
 // Called every frame

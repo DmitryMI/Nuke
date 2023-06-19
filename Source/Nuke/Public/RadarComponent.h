@@ -42,7 +42,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual TArray<AActor*> GetTrackedThreats() const;
+	virtual TArray<AActor*> GetTrackedThreatsArray() const;
+
+	virtual bool GetTrackedThreats(TArray<AActor*>& outThreats) const;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetGenericTeamId(const FGenericTeamId& team);

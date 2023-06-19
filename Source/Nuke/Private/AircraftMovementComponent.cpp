@@ -108,6 +108,8 @@ void UAircraftMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 
 	if (bNavigateToWaypoint)
 	{
+		requestedSpeed = requestedWaypoint.Speed;
+
 		FVector direction = requestedWaypoint.Location - GetOwner()->GetActorLocation();
 		if (!direction.IsNearlyZero())
 		{
@@ -127,6 +129,20 @@ void UAircraftMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 				float arcDistance = 1 / (2 * FMath::Sin(yawDeltaRadAbs / 2)) * distance * yawDeltaRadAbs;
 				float arcFraction = currentSpeed / arcDistance * DeltaTime;
 				float yawStep = yawDelta * arcFraction;
+
+				if (FMath::Abs(yawStep) > maxAngularSpeedsPitchYaw.Y * DeltaTime)
+				{
+					
+					if (FMath::IsNearlyEqual(currentSpeed, speedMinMax.X))
+					{
+						UE_LOG(LogTemp, Warning, TEXT("%s: Nav point %s is unreachable due to yaw turn-rate limits! Slowing down will not help, already at minimal speed!"), *GetOwner()->GetName(), *requestedWaypoint.Location.ToString());
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("%s: Nav point %s is unreachable due to yaw turn-rate limits! Slowing down, maybe this helps"), *GetOwner()->GetName(), *requestedWaypoint.Location.ToString());
+						requestedSpeed = speedMinMax.X;
+					}
+				}
 
 				float minAngularStep = minAngularSpeedsPitchYaw.Y * DeltaTime;
 				if (FMath::Abs(yawStep) < minAngularStep)
@@ -149,6 +165,21 @@ void UAircraftMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 				float arcDistance = 1 / (2 * FMath::Sin(pitchDeltaRadAbs / 2)) * distance * pitchDeltaRadAbs;
 				float arcFraction = currentSpeed / arcDistance * DeltaTime;
 				float pitchStep = pitchDelta * arcFraction;
+
+				if (FMath::Abs(pitchStep) > maxAngularSpeedsPitchYaw.X * DeltaTime)
+				{
+
+					if (FMath::IsNearlyEqual(currentSpeed, speedMinMax.X))
+					{
+						UE_LOG(LogTemp, Warning, TEXT("%s: Nav point %s is unreachable due to yaw turn-rate limits! Slowing down will not help, already at minimal speed!"), *GetOwner()->GetName(), *requestedWaypoint.Location.ToString());
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("%s: Nav point %s is unreachable due to yaw turn-rate limits! Slowing down, maybe this helps"), *GetOwner()->GetName(), *requestedWaypoint.Location.ToString());
+						requestedSpeed = speedMinMax.X;
+					}
+				}
+
 				float minAngularStep = minAngularSpeedsPitchYaw.X * DeltaTime;
 				if (FMath::Abs(pitchStep) < minAngularStep)
 				{
@@ -166,8 +197,6 @@ void UAircraftMovementComponent::TickComponent(float DeltaTime, ELevelTick TickT
 		}
 
 		requestedRotation.Pitch = FMath::Clamp(requestedRotation.Pitch, pitchMinMax.X, pitchMinMax.Y);
-
-		requestedSpeed = requestedWaypoint.Speed;
 	}
 
 	FRotator rotation = RotateTowardsTarget(DeltaTime);

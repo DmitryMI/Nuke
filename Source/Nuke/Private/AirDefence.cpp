@@ -150,7 +150,7 @@ bool AAirDefence::IsWeaponReady() const
 
 TArray<AActor*> AAirDefence::GetTrackedEnemies() const
 {
-	return radarComponent->GetTrackedThreats();
+	return radarComponent->GetTrackedThreatsArray();
 }
 
 float AAirDefence::GetWeaponMaxSpeed() const
