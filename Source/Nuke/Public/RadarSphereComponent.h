@@ -18,9 +18,6 @@ class NUKE_API URadarSphereComponent : public URadarComponent
 private:
 
 	UPROPERTY(EditAnywhere)
-	float radius = 10000.0f;
-
-	UPROPERTY(EditAnywhere)
 	USphereComponent* sphereCollision;
 
 protected:
@@ -33,7 +30,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	virtual void SetRadarRadius(float radarRadius);
+	virtual void SetRadarRange(float radarRadius) override;
 
-	float GetRadarRadius() const;
 };

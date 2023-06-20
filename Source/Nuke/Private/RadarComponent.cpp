@@ -52,7 +52,7 @@ void URadarComponent::BindPrimitiveComponentColliders()
 	}
 }
 
-void URadarComponent::OnActorEnteredRadarRage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp)
+void URadarComponent::OnActorEnteredRadarRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp)
 {
 	if (OtherActor == GetOwner())
 	{
@@ -92,12 +92,12 @@ void URadarComponent::OnActorEnteredRadarRage(UPrimitiveComponent* OverlappedCom
 
 void URadarComponent::ProcessInitialOverlap(UPrimitiveComponent* OverlappedComponent, AActor* actor, UPrimitiveComponent* otherComponent)
 {
-	OnActorEnteredRadarRage(OverlappedComponent, actor, otherComponent);
+	OnActorEnteredRadarRange(OverlappedComponent, actor, otherComponent);
 }
 
 void URadarComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	OnActorEnteredRadarRage(OverlappedComponent, OtherActor, OtherComp);
+	OnActorEnteredRadarRange(OverlappedComponent, OtherActor, OtherComp);
 }
 
 void URadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -157,13 +157,28 @@ bool URadarComponent::EvaluateTrackingConditions(AActor* actor) const
 		}
 	}
 
+	FVector radarLocation = GetOwner()->GetActorLocation() + GetRelativeLocation();
+	FVector actorLocation = actor->GetActorLocation();
+
+	double distanceSq = (radarLocation - actorLocation).SizeSquared();
+	double detectionRangeFactor = (1.0 - attackable->GetStealthFactor());
+	check(0 <= detectionRangeFactor && detectionRangeFactor <= 1);
+	
+	// If detectionRangeFactor is 1.0, we don't need to recalculate the distance
+	if (detectionRangeFactor < 1.0)
+	{
+		double detectionRange = GetRadarRange() * detectionRangeFactor;
+		if (distanceSq > FMath::Square(detectionRange))
+		{
+			return false;
+		}
+	}
+
 	TArray<FHitResult> hitResults;
-	FVector traceStart = GetOwner()->GetActorLocation() + GetRelativeLocation();
-	FVector traceEnd = actor->GetActorLocation();
 	FCollisionQueryParams queryParams;
 	queryParams.AddIgnoredActor(GetOwner());
 	queryParams.AddIgnoredActor(actor);
-	GetWorld()->LineTraceMultiByProfile(hitResults, traceStart, traceEnd, "RadarLineOfSight", queryParams);
+	GetWorld()->LineTraceMultiByProfile(hitResults, radarLocation, actorLocation, "RadarLineOfSight", queryParams);
 	if (hitResults.Num() != 0)
 	{
 		return false;
@@ -234,6 +249,16 @@ EMobilityEnvironmentType URadarComponent::GetDetectableMobilityType() const
 void URadarComponent::SetDetectableMobilityType(EMobilityEnvironmentType mobilityType)
 {
 	detectableMobilityType = mobilityType;
+}
+
+void URadarComponent::SetRadarRange(float range)
+{
+	radarRange = range;
+}
+
+float URadarComponent::GetRadarRange() const
+{
+	return radarRange;
 }
 
 

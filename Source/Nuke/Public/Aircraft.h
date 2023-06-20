@@ -102,5 +102,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
 
+	UFUNCTION(BlueprintCallable)
 	virtual EMobilityEnvironmentType GetMobilityEnvironmentType() const override;
 };

@@ -36,7 +36,7 @@ AAirDefence::AAirDefence()
 	//RootComponent->RegisterComponent();
 
 	radarComponent = CreateDefaultSubobject<URadarSphereComponent>("RadarCollider");
-	radarComponent->SetRadarRadius(weaponRange);
+	radarComponent->SetRadarRange(weaponRange);
 	radarComponent->SetupAttachment(RootComponent);
 	//radarCollider->RegisterComponent();
 }
@@ -122,7 +122,7 @@ void AAirDefence::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyC
 {
 	if (PropertyChangedEvent.Property->GetName() == "weaponRange")
 	{
-		radarComponent->SetRadarRadius(weaponRange);
+		radarComponent->SetRadarRange(weaponRange);
 	}
 
 

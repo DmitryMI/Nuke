@@ -18,3 +18,8 @@ EMobilityEnvironmentType IAttackable::GetMobilityEnvironmentType() const
 {
     return EMobilityEnvironmentType::MET_None;
 }
+
+float IAttackable::GetStealthFactor() const
+{
+    return 0.0f;
+}

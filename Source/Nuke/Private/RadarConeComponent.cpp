@@ -6,9 +6,9 @@
 #if WITH_EDITOR  
 void URadarConeComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.Property->GetName() == "range" && sphereCollision != nullptr)
+	if (PropertyChangedEvent.Property->GetName() == "radarRange" && sphereCollision != nullptr)
 	{
-		sphereCollision->SetSphereRadius(range);
+		sphereCollision->SetSphereRadius(GetRadarRange());
 	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -46,26 +46,21 @@ void URadarConeComponent::BeginPlay()
 	if (ensure(sphereCollision))
 	{
 		sphereCollision->SetCollisionProfileName(TEXT("RadarQuery"));
-		sphereCollision->SetSphereRadius(range);
+		sphereCollision->SetSphereRadius(GetRadarRange());
 	}
 
 	Super::BeginPlay();
-
-	float coneAngleRad = FMath::DegreesToRadians(coneAngleDeg);
-	coneAngleCos = FMath::Cos(coneAngleRad);
 }
 #endif
 
 
 void URadarConeComponent::SetRadarRange(float radarRadius)
 {
-	range = radarRadius;
-	sphereCollision->SetSphereRadius(range);
+	Super::SetRadarRange(radarRadius);
+	sphereCollision->SetSphereRadius(radarRadius);
 }
 
 void URadarConeComponent::SetConeAngleDeg(float angleDeg)
 {
 	coneAngleDeg = angleDeg;
-	float coneAngleRad = FMath::DegreesToRadians(coneAngleDeg);
-	coneAngleCos = FMath::Cos(coneAngleRad);
 }

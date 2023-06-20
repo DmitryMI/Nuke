@@ -18,15 +18,10 @@ class NUKE_API URadarConeComponent : public URadarComponent
 private:
 
 	UPROPERTY(EditDefaultsOnly)
-	float range = 10000.0f;
-
-	UPROPERTY(EditDefaultsOnly)
 	float coneAngleDeg = 30.0f;
 
 	UPROPERTY(EditAnywhere)
 	USphereComponent* sphereCollision;
-
-	float coneAngleCos;
 
 protected:
 #if WITH_EDITOR  
@@ -37,8 +32,7 @@ protected:
 
 	virtual void BeginPlay() override;
 public:
-	UFUNCTION(BlueprintCallable)
-	virtual void SetRadarRange(float radarRadius);
+	virtual void SetRadarRange(float radarRadius) override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetConeAngleDeg(float angleDeg);

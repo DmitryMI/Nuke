@@ -6,9 +6,9 @@
 #if WITH_EDITOR  
 void URadarSphereComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.Property->GetName() == "radius" && sphereCollision != nullptr)
+	if (PropertyChangedEvent.Property->GetName() == "radarRange" && sphereCollision != nullptr)
 	{
-		sphereCollision->SetSphereRadius(radius);
+		sphereCollision->SetSphereRadius(GetRadarRange());
 	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -27,23 +27,18 @@ void URadarSphereComponent::BeginPlay()
 	if (ensure(sphereCollision))
 	{
 		sphereCollision->SetCollisionProfileName(TEXT("RadarQuery"));
-		sphereCollision->SetSphereRadius(radius);
+		sphereCollision->SetSphereRadius(GetRadarRange());
 	}
 
 	Super::BeginPlay();
 }
 
-void URadarSphereComponent::SetRadarRadius(float radarRadius)
+void URadarSphereComponent::SetRadarRange(float radarRadius)
 {
-	radius = radarRadius;
+	Super::SetRadarRange(radarRadius);
 
 	if (sphereCollision)
 	{
 		sphereCollision->SetSphereRadius(radarRadius);
 	}
-}
-
-float URadarSphereComponent::GetRadarRadius() const
-{
-	return radius;
 }

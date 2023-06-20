@@ -20,6 +20,9 @@ private:
 	TArray<AActor*> threatsInRadarRange;
 
 	UPROPERTY(EditAnywhere)
+	float radarRange = 10000.0f;
+
+	UPROPERTY(EditAnywhere)
 	EMobilityEnvironmentType detectableMobilityType = EMobilityEnvironmentType::MET_None;
 
 public:	
@@ -32,7 +35,7 @@ protected:
 
 	virtual void BindPrimitiveComponentColliders();
 
-	virtual void OnActorEnteredRadarRage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp);
+	virtual void OnActorEnteredRadarRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp);
 
 	virtual void ProcessInitialOverlap(UPrimitiveComponent* OverlappedComponent, AActor* actor, UPrimitiveComponent* otherComponent);
 
@@ -66,4 +69,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetDetectableMobilityType(EMobilityEnvironmentType mobilityType);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetRadarRange(float range);
+
+	UFUNCTION(BlueprintCallable)
+	float GetRadarRange() const;
 };
