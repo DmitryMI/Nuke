@@ -8,6 +8,7 @@
 #include "BallisticMovementComponent.h"
 #include "AircraftWaypoint.h"
 #include "City.h"
+#include "Missile.h"
 #include "AIUtils.generated.h"
 
 /**
@@ -65,4 +66,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	static bool GetTrackedThreatsByRadar(AActor* radarActor, TArray<AActor*>& outTrackedThreats);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static bool GetTrackingMissiles(AActor* targetActor, TArray<AMissile*>& outMissiles);
 };

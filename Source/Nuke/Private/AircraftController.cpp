@@ -3,11 +3,66 @@
 
 #include "AircraftController.h"
 #include "Aircraft.h"
+#include "Missile.h"
 #include "AircraftMovementComponent.h"
+
+void AAircraftController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetWorld()->GetTimerManager().SetTimer(
+		scanForTrackingMissilesHandle, 
+		this, 
+		&AAircraftController::ScanForTrackingThreats,
+		scanForTrackingMissilesInterval,
+		true, 
+		scanForTrackingMissilesInterval
+	);
+}
+
+void AAircraftController::ScanForTrackingThreats()
+{
+	AAircraft* aircraft = Cast<AAircraft>(GetPawn());
+	check(aircraft);
+
+	if (radarDetector)
+	{
+		trackingMissilesNum = 0;
+		trackingFightersNum = 0;
+
+		TArray<AActor*> radars;
+		radarDetector->GetDetectedRadars(radars);
+		for (AActor* radar : radars)
+		{
+			if (Cast<AMissile>(radar))
+			{
+				trackingMissilesNum++;
+			}
+			else if (Cast<AAircraft>(radar))
+			{
+				trackingFightersNum++;
+			}
+		}
+		radarDetector->ClearDetectionData();
+	}
+}
+
+void AAircraftController::OnPossess(APawn* pawn)
+{
+	Super::OnPossess(pawn);
+
+	radarDetector = pawn->GetComponentByClass<URadarDetectorComponent>();
+}
 
 bool AAircraftController::HasValidPath() const
 {
 	return FollowedAirPath && FollowedAirPath->IsValid();
+}
+
+bool AAircraftController::IsPathFinished() const
+{
+	check(HasValidPath());
+	return FollowedAirPath->IsFinished();
 }
 
 bool AAircraftController::IsNearNextWaypoint() const
@@ -47,6 +102,14 @@ void AAircraftController::Tick(float DeltaTime)
 #if WITH_EDITOR
 	DrawFollowedPath();
 #endif
+
+	AAircraft* aircraft = Cast<AAircraft>(GetPawn());
+	check(aircraft);
+
+	if ((trackingMissilesNum + trackingFightersNum) > 0 && aircraft->HasFlares() && aircraft->AreFlaresReady())
+	{
+		aircraft->DeployFlareDecoy();
+	}
 }
 
 #if WITH_EDITOR

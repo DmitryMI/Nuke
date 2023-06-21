@@ -5,6 +5,7 @@
 #include "Attackable.h"
 #include "Radar.h"
 #include "Kismet/GameplayStatics.h"
+#include "RadarDetectorComponent.h"
 
 bool UAIUtils::AreEnemies(AActor* actor1, AActor* actor2)
 {
@@ -317,4 +318,15 @@ bool UAIUtils::GetTrackedThreatsByRadar(AActor* radarActor, TArray<AActor*>& out
 		return false;
 	}
 	return radar->GetTrackedThreats(outTrackedThreats);
+}
+
+bool UAIUtils::GetTrackingMissiles(AActor* targetActor, TArray<AMissile*>& outMissiles)
+{
+	URadarDetectorComponent* detector = targetActor->GetComponentByClass<URadarDetectorComponent>();
+	if (!detector)
+	{
+		return false;
+	}
+
+	return detector->GetDetectedRadars(outMissiles);
 }

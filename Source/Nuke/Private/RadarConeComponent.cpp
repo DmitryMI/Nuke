@@ -38,7 +38,7 @@ bool URadarConeComponent::IsActorTrackedByRadar(AActor* actor) const
 		return false;
 	}
 
-	return Super::EvaluateTrackingConditions(actor);
+	return Super::TryTrackAndNotify(actor);
 }
 void URadarConeComponent::BeginPlay()
 {

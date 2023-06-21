@@ -10,6 +10,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "Radar.h"
 #include "FlareDecoy.h"
+#include "RadarDetectorComponent.h"
 #include "Aircraft.generated.h"
 
 class AAirbase;
@@ -63,6 +64,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UAircraftMovementComponent* aircraftMovement;
+
+	UPROPERTY(EditAnywhere)
+	URadarDetectorComponent* radarDetector;
 
 	UPROPERTY(EditAnywhere)
 	FGenericTeamId teamId;

@@ -48,17 +48,23 @@ AAircraft::AAircraft()
 	bodyCollider->SetupAttachment(RootComponent);
 
 	aircraftMovement = CreateDefaultSubobject<UAircraftMovementComponent>(TEXT("AircraftMovementComponent"));
+	radarDetector = CreateDefaultSubobject<URadarDetectorComponent>(TEXT("RadarDetectorComponent"));
 }
 
 // Called when the game starts or when spawned
 void AAircraft::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (!aircraftMovement)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("guidedMovement was nullptr!"));
 		aircraftMovement = GetComponentByClass<UAircraftMovementComponent>();
+	}
+
+	if (!radarDetector)
+	{
+		radarDetector = GetComponentByClass<URadarDetectorComponent>();
 	}
 }
 
@@ -220,6 +226,11 @@ EMobilityEnvironmentType AAircraft::GetMobilityEnvironmentType() const
 
 AFlareDecoy* AAircraft::DeployFlareDecoy()
 {
+	if (!IsAlive())
+	{
+		return nullptr;
+	}
+
 	if (!AreFlaresReady() || !HasFlares())
 	{
 		return nullptr;

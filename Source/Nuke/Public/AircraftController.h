@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "AircraftWaypoint.h"
 #include "AirPath.h"
+#include "RadarDetectorComponent.h"
 #include "AircraftController.generated.h"
 
 class AAirbase;
@@ -22,6 +23,21 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float pathToleranceDefault = 500.0f;
 
+	UPROPERTY(EditDefaultsOnly)
+	float scanForTrackingMissilesInterval = 1.0f;
+
+	UPROPERTY(VisibleAnywhere)
+	URadarDetectorComponent* radarDetector;
+
+	UPROPERTY()
+	FTimerHandle scanForTrackingMissilesHandle;
+
+	UPROPERTY(VisibleAnywhere)
+	int trackingMissilesNum = 0;
+
+	UPROPERTY(VisibleAnywhere)
+	int trackingFightersNum = 0;
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -30,9 +46,18 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	AAirbase* HomeBase = nullptr;
 
+	virtual void BeginPlay() override;
+
+	void ScanForTrackingThreats();
+
 public:
+	virtual void OnPossess(APawn* pawn) override;
+
 	UFUNCTION(BlueprintCallable)
 	bool HasValidPath() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsPathFinished() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsNearNextWaypoint() const;

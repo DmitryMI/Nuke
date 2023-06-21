@@ -3,6 +3,7 @@
 
 #include "RadarComponent.h"
 #include "Attackable.h"
+#include "RadarDetectorComponent.h"
 
 // Sets default values for this component's properties
 URadarComponent::URadarComponent()
@@ -139,7 +140,7 @@ void URadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 	}
 }
 
-bool URadarComponent::EvaluateTrackingConditions(AActor* actor) const
+bool URadarComponent::TryTrackAndNotify(AActor* actor) const
 {
 	IAttackable* attackable = Cast<IAttackable>(actor);
 	if (!attackable)
@@ -187,6 +188,11 @@ bool URadarComponent::EvaluateTrackingConditions(AActor* actor) const
 		return false;
 	}
 
+	URadarDetectorComponent* radarDetector = actor->GetComponentByClass<URadarDetectorComponent>();
+	if (radarDetector)
+	{
+		radarDetector->NotifyDetection(GetOwner());
+	}
 	return true;
 }
 
@@ -210,7 +216,7 @@ bool URadarComponent::GetTrackedThreats(TArray<AActor*>& outThreats) const
 {
 	for (AActor* actor : threatsInRadarRange)
 	{
-		if (!EvaluateTrackingConditions(actor))
+		if (!TryTrackAndNotify(actor))
 		{
 			continue;
 		}
@@ -241,7 +247,7 @@ bool URadarComponent::IsActorTrackedByRadar(AActor* actor) const
 		return false;
 	}
 
-	return EvaluateTrackingConditions(actor);
+	return TryTrackAndNotify(actor);
 }
 
 EMobilityEnvironmentType URadarComponent::GetDetectableMobilityType() const

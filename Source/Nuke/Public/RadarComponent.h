@@ -45,7 +45,7 @@ protected:
 	UFUNCTION()
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	virtual bool EvaluateTrackingConditions(AActor* actor) const;
+	virtual bool TryTrackAndNotify(AActor* actor) const;
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

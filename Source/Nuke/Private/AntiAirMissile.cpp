@@ -166,8 +166,18 @@ bool AAntiAirMissile::IsActorTrackedByRadar(AActor* actor) const
 	}
 
 	bool isInsideCone = IsActorInsideRadarCone(actor);
+	if (!isInsideCone)
+	{
+		return false;
+	}
 
-	return isInsideCone;
+	URadarDetectorComponent* detector = actor->GetComponentByClass<URadarDetectorComponent>();
+	if (detector)
+	{
+		detector->NotifyDetection(this);
+	}
+
+	return true;
 }
 
 bool AAntiAirMissile::IsTargetTrackedByMissileOrInstigator() const
