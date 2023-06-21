@@ -49,12 +49,14 @@ AAntiAirMissile* AFighter::LaunchAntiAirMissile(AActor* shootTarget)
 		return nullptr;
 	}
 
-	
+	float offset = 100.0f * ((antiAirMissileNumber % 2) * 2 - 1);
+	FVector spawnLocation = GetActorLocation() + GetActorRightVector() * offset;
+	spawnLocation += FVector::DownVector * 50.0f;
 
 	FActorSpawnParameters spawnParams;
 	spawnParams.Instigator = this;
 	spawnParams.Owner = this;
-	AAntiAirMissile* projectile = GetWorld()->SpawnActor<AAntiAirMissile>(antiAirMissileType, GetActorLocation() + FVector::DownVector * 100, GetActorRotation(), spawnParams);
+	AAntiAirMissile* projectile = GetWorld()->SpawnActor<AAntiAirMissile>(antiAirMissileType, spawnLocation, GetActorRotation(), spawnParams);
 	if (!projectile)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn a missile!"));
