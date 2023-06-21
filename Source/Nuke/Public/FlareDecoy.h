@@ -15,7 +15,7 @@ class NUKE_API AFlareDecoy : public APawn
 
 private:
 	UPROPERTY(EditAnywhere)
-	float flareDuration = 5.0f;
+	float flareDuration = 3.0f;
 
 	UPROPERTY()
 	UFlareMovementComponent* flareMovement;

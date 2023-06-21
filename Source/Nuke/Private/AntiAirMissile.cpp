@@ -138,6 +138,11 @@ bool AAntiAirMissile::IsActorTrackedByRadar(AActor* actor) const
 		return false;
 	}
 
+	if (actor->IsPendingKillPending())
+	{
+		return false;
+	}
+
 	if (GetLockedOnTarget() != actor)
 	{
 		return false;

@@ -114,10 +114,10 @@ void AAircraftController::MakePathToLocationAndFollow(const FVector& location)
 
 	FVector direction = location - aircraft->GetActorLocation();
 	float distance = direction.Size();
-	float intermediateDistance = FMath::Min(10000.0f, distance / 2.0f);
+	float intermediateDistance = FMath::Max(10000.0f, distance / 2.0f);
 
 	direction /= distance;
-	FVector intermediatePoint = aircraft->GetActorLocation() + direction * intermediateDistance;
+	FVector intermediatePoint = location - direction * intermediateDistance;
 	intermediatePoint.Z = 3000.0f;
 
 	pathToLocation.Add(FAircraftWaypoint(intermediatePoint, maxSpeed));
