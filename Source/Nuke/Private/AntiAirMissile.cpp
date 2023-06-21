@@ -5,6 +5,7 @@
 #include "Components/ArrowComponent.h"
 #include "GuidedMissileMovementComponent.h"
 #include "AntiAirMissileController.h"
+#include "Aircraft.h"
 
 // Sets default values
 AAntiAirMissile::AAntiAirMissile()
@@ -45,7 +46,25 @@ void AAntiAirMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	AActor* target = GetLockedOnTarget();
+	if (AAircraft* targetAircraft = Cast<AAircraft>(target))
+	{
+		const TArray<AFlareDecoy*>& flareDecoys = targetAircraft->GetActiveFlayers();
+		for (AFlareDecoy* decoy : flareDecoys)
+		{
+			if (decoy == nullptr)
+			{
+				continue;
+			}
 
+			double random = FMath::RandRange(0.0, 1.0);
+			if (random < flareDistractionChancePerSecond * DeltaTime)
+			{
+				SetLockedOnTarget(decoy);
+				break;
+			}
+		}
+	}
 }
 
 void AAntiAirMissile::SetLockedOnTarget(AActor* actor)
@@ -105,10 +124,18 @@ bool AAntiAirMissile::IsActorTrackedByRadar(AActor* actor) const
 		return false;
 	}
 
-	IAttackable* attackable = Cast<IAttackable>(actor);
-	if (!attackable || !attackable->IsAlive())
+	if (AFlareDecoy* decoy = Cast<AFlareDecoy>(actor))
 	{
-		return false;
+		return true;
+	}
+
+	IAttackable* attackable = Cast<IAttackable>(actor);
+	if (attackable)
+	{
+		if (!attackable->IsAlive())
+		{
+			return false;
+		}
 	}
 
 	FVector direction = actor->GetActorLocation() - GetActorLocation();

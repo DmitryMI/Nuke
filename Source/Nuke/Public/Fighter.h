@@ -27,7 +27,7 @@ private:
 	int antiAirMissileNumber = 6;
 
 	UPROPERTY(EditDefaultsOnly)
-	float antiAirMissileCooldown= 1.0f;
+	float antiAirMissileCooldown= 2.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 	float radarRange = 50000.0f;
@@ -67,4 +67,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool HasAntiAirMissiles() const;
+
+	
 };

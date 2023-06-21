@@ -102,3 +102,4 @@ bool AFighter::HasAntiAirMissiles() const
 {
 	return antiAirMissileNumber > 0;
 }
+

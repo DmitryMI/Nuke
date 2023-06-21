@@ -9,6 +9,7 @@
 #include "AircraftMovementComponent.h"
 #include "GenericTeamAgentInterface.h"
 #include "Radar.h"
+#include "FlareDecoy.h"
 #include "Aircraft.generated.h"
 
 class AAirbase;
@@ -25,6 +26,23 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float health = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float flaresCooldown = 0.25f;
+
+	bool bFlaresReady = true;
+
+	UPROPERTY(EditDefaultsOnly)
+	int flaresCharges = 24;
+
+	UPROPERTY(EditDefaultsOnly)
+	float flaresDuration = 5.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AFlareDecoy> flareType;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<AFlareDecoy*> flaresActive;
 
 	UPROPERTY(VisibleAnywhere)
 	bool bIsAlive = true;
@@ -55,7 +73,12 @@ private:
 	UPROPERTY()
 	FTimerHandle destroyDelayedHandle;
 
+	UPROPERTY()
+	FTimerHandle flareCooldownHandle;
+
 	void OnDestroyDelayedExpired();
+
+	void OnFlareCooldownExpired();
 
 public:
 	// Sets default values for this pawn's properties
@@ -104,4 +127,19 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual EMobilityEnvironmentType GetMobilityEnvironmentType() const override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual AFlareDecoy* DeployFlareDecoy();
+
+	UFUNCTION(BlueprintCallable)
+	bool HasFlares() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool AreFlaresReady() const;
+
+	UFUNCTION(BlueprintCallable)
+	const TArray<AFlareDecoy*>& GetActiveFlayers() const;
+
+	UFUNCTION(BlueprintCallable)
+	int GetActiveFlayersCount() const;
 };

@@ -142,7 +142,10 @@ void URadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 bool URadarComponent::EvaluateTrackingConditions(AActor* actor) const
 {
 	IAttackable* attackable = Cast<IAttackable>(actor);
-	check(attackable);
+	if (!attackable)
+	{
+		return false;
+	}
 
 	if (!attackable->IsAlive())
 	{

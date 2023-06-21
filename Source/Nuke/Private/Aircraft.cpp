@@ -27,6 +27,11 @@ void AAircraft::OnDestroyDelayedExpired()
 	Destroy();
 }
 
+void AAircraft::OnFlareCooldownExpired()
+{
+	bFlaresReady = true;
+}
+
 // Sets default values
 AAircraft::AAircraft()
 {
@@ -132,16 +137,18 @@ TArray<AActor*> AAircraft::GetTrackedThreatsArray() const
 
 	TArray<AActor*> trackedThreats;
 
-	for (URadarComponent* radar : radarComponents)
-	{
-		radar->GetTrackedThreats(trackedThreats);
-	}
+	GetTrackedThreats(trackedThreats);
 
 	return trackedThreats;
 }
 
 bool AAircraft::GetTrackedThreats(TArray<AActor*>& outThreats) const
 {
+	if (!IsAlive())
+	{
+		return false;
+	}
+
 	TInlineComponentArray<URadarComponent*> radarComponents;
 	GetComponents(radarComponents);
 
@@ -187,6 +194,11 @@ void AAircraft::LandOnBase(AAirbase* airbase)
 
 bool AAircraft::IsActorTrackedByRadar(AActor* actor) const
 {
+	if (!IsAlive())
+	{
+		return false;
+	}
+
 	TInlineComponentArray<URadarComponent*> radarComponents;
 	GetComponents(radarComponents);
 
@@ -204,4 +216,60 @@ bool AAircraft::IsActorTrackedByRadar(AActor* actor) const
 EMobilityEnvironmentType AAircraft::GetMobilityEnvironmentType() const
 {
 	return EMobilityEnvironmentType::MET_Air;
+}
+
+AFlareDecoy* AAircraft::DeployFlareDecoy()
+{
+	if (!AreFlaresReady() || !HasFlares())
+	{
+		return nullptr;
+	}
+
+	FVector spawnLocation = GetActorLocation();
+	FRotator spawnRotation = GetActorRotation();
+	FActorSpawnParameters params;
+	params.Instigator = this;
+	params.Owner = this;
+	AFlareDecoy* flare = GetWorld()->SpawnActor<AFlareDecoy>(flareType, spawnLocation, spawnRotation, params);
+	check(flare);
+
+	FVector velocity = GetActorRightVector() * ((flaresCharges % 2) * 2 - 1) * 300.0f * GetWorld()->DeltaTimeSeconds;
+	velocity += GetAircraftMovementComponent()->Velocity;
+	flare->SetVelocity(velocity);
+
+	bFlaresReady = false;
+	flaresCharges--;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		flareCooldownHandle,
+		this,
+		&AAircraft::OnFlareCooldownExpired,
+		flaresCooldown,
+		false,
+		flaresCooldown
+	);
+
+	flaresActive.Add(flare);
+
+	return flare;
+}
+
+bool AAircraft::HasFlares() const
+{
+	return flaresCharges > 0;
+}
+
+bool AAircraft::AreFlaresReady() const
+{
+	return bFlaresReady;
+}
+
+const TArray<AFlareDecoy*>& AAircraft::GetActiveFlayers() const
+{
+	return flaresActive;
+}
+
+int AAircraft::GetActiveFlayersCount() const
+{
+	return flaresActive.Num();
 }

@@ -28,6 +28,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	double radarConeAngle = 80.0f;
 
+	UPROPERTY(EditDefaultsOnly)
+	double flareDistractionChancePerSecond = 0.02;
+
 public:
 	// Sets default values for this pawn's properties
 	AAntiAirMissile();

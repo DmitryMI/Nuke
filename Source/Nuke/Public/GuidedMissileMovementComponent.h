@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/MovementComponent.h"
 #include "GuidedMissileMovementComponent.generated.h"
 
 /**
@@ -25,7 +25,7 @@ private:
 	float maxSpeed = 3000;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
-	float maxTurnRateDegrees = 360;
+	float maxTurnRateDegrees = 180;
 
 	UPROPERTY(VisibleAnywhere, Category = "Movement|Runtime")
 	bool bIsMovementFrozen = false;
