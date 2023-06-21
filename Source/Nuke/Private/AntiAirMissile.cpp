@@ -39,6 +39,20 @@ void AAntiAirMissile::OnProximityFuseCollisionBegin(UPrimitiveComponent* Overlap
 	Super::OnProximityFuseCollisionBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
 
+bool AAntiAirMissile::IsActorInsideRadarCone(AActor* actor) const
+{
+	FVector direction = actor->GetActorLocation() - GetActorLocation();
+
+	FRotator rotation = GetActorRotation();
+	FRotator angleToActor = direction.Rotation();
+
+	// Incorrect, but fast
+	double yawDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Yaw, angleToActor.Yaw);
+	double pitchDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Pitch, angleToActor.Pitch);
+
+	return FMath::Abs(yawDeltaAngleDeg) <= radarConeAngle && FMath::Abs(pitchDeltaAngleDeg) < radarConeAngle;
+}
+
 
 
 // Called every frame
@@ -53,6 +67,11 @@ void AAntiAirMissile::Tick(float DeltaTime)
 		for (AFlareDecoy* decoy : flareDecoys)
 		{
 			if (decoy == nullptr)
+			{
+				continue;
+			}
+
+			if (!IsActorInsideRadarCone(decoy))
 			{
 				continue;
 			}
@@ -124,10 +143,7 @@ bool AAntiAirMissile::IsActorTrackedByRadar(AActor* actor) const
 		return false;
 	}
 
-	if (AFlareDecoy* decoy = Cast<AFlareDecoy>(actor))
-	{
-		return true;
-	}
+	FVector direction = actor->GetActorLocation() - GetActorLocation();
 
 	IAttackable* attackable = Cast<IAttackable>(actor);
 	if (attackable)
@@ -136,23 +152,17 @@ bool AAntiAirMissile::IsActorTrackedByRadar(AActor* actor) const
 		{
 			return false;
 		}
+		
+		double distanceSq = direction.SizeSquared();
+		if (distanceSq > FMath::Square(radarRange))
+		{
+			return false;
+		}
 	}
 
-	FVector direction = actor->GetActorLocation() - GetActorLocation();
-	double distanceSq = direction.SizeSquared();
-	if (distanceSq > FMath::Square(radarRange))
-	{
-		return false;
-	}
+	bool isInsideCone = IsActorInsideRadarCone(actor);
 
-	FRotator rotation = GetActorRotation();
-	FRotator angleToActor = direction.Rotation();
-
-	// Incorrect, but fast
-	double yawDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Yaw, angleToActor.Yaw);
-	double pitchDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Pitch, angleToActor.Pitch);
-
-	return FMath::Abs(yawDeltaAngleDeg) <= radarConeAngle && FMath::Abs(pitchDeltaAngleDeg) < radarConeAngle;
+	return isInsideCone;
 }
 
 bool AAntiAirMissile::IsTargetTrackedByMissileOrInstigator() const
