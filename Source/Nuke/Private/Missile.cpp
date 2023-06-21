@@ -62,8 +62,10 @@ void AMissile::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	bodyCollider->OnComponentBeginOverlap.AddDynamic(this, &AMissile::OnBodyCollisionBegin);
+	bodyCollider->OnComponentBeginOverlap.AddDynamic(this, &AMissile::OnBodyOverlapBegin);
 	proximityCollider->OnComponentBeginOverlap.AddDynamic(this, &AMissile::OnProximityFuseCollisionBegin);
+
+	bodyCollider->OnComponentHit.AddDynamic(this, &AMissile::OnBodyHit);
 
 	IGenericTeamAgentInterface* teamAgent = GetInstigator<IGenericTeamAgentInterface>();
 	if (teamAgent)
@@ -81,7 +83,14 @@ void AMissile::BeginPlay()
 	);
 }
 
-void AMissile::OnBodyCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AMissile::OnBodyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	UE_LOG(LogTemp, Display, TEXT("Missile %s (body) collided with %s"), *GetName(), *OtherActor->GetName());
+
+	Detonate();
+}
+
+void AMissile::OnBodyOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AActor* instigator = GetInstigator();
 	if (OtherActor == instigator)
@@ -101,7 +110,7 @@ void AMissile::OnBodyCollisionBegin(UPrimitiveComponent* OverlappedComponent, AA
 		return;
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("Missile %s Collided with %s"), *GetName(), *OtherActor->GetName());
+	UE_LOG(LogTemp, Display, TEXT("Missile %s (body) overlaped with %s"), *GetName(), *OtherActor->GetName());
 
 	Detonate();
 }

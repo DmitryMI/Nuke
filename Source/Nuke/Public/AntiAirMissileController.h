@@ -32,6 +32,9 @@ protected:
 	void FlyTowardsLocation(const FVector& location);
 
 	UFUNCTION(BlueprintCallable)
+	void FlyForward();
+
+	UFUNCTION(BlueprintCallable)
 	void FlyTowardsTargetActor();
 
 	UFUNCTION(BlueprintCallable)

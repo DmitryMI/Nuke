@@ -32,10 +32,10 @@ private:
 	float proximityFuseDelay = 0.1;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	float bodyRadius = 0.43;
+	float bodyRadius = 10;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-		float bodyLength = 5.3;
+	float bodyLength = 200;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 		float maxLifetime = 20.0f;
@@ -81,7 +81,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	virtual void OnBodyCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	virtual void OnBodyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION()
+	virtual void OnBodyOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	virtual void OnProximityFuseCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 

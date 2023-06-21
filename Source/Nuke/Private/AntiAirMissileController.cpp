@@ -30,12 +30,19 @@ void AAntiAirMissileController::FlyTowardsLocation(const FVector& location)
 	guidedMissileMovement->RequestMovementTowardsLocation(location);
 }
 
+void AAntiAirMissileController::FlyForward()
+{
+	APawn* pawn = GetPawn();
+	FVector location = pawn->GetActorForwardVector() * 100000.0f;
+	FlyTowardsLocation(location);
+}
+
 void AAntiAirMissileController::FlyTowardsTargetActor()
 {
 	UGuidedMissileMovementComponent* guidedMissileMovement = GetGuidedMovementComponent();
 	check(guidedMissileMovement);
 
-	guidedMissileMovement->RequestMovementTowardsTargetActor();
+	guidedMissileMovement->RequestMovementTowardsActor(target);
 }
 
 void AAntiAirMissileController::FlyTowardsLinearInterceptionLocation()
@@ -97,9 +104,6 @@ void AAntiAirMissileController::SetTarget(AActor* targetNew)
 	this->target = targetNew;
 	GetBlackboardComponent()->SetValueAsObject("Target", targetNew);
 
-	//GetPawn<ASurfaceToAirMissile>()->SetLockedOnTarget(targetNew);
-	UGuidedMissileMovementComponent* guidedMissileMovement = GetGuidedMovementComponent();
-	guidedMissileMovement->SetTargetActor(targetNew);
 	FlyTowardsTargetActor();
 }
 

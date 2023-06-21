@@ -10,11 +10,6 @@ void UGuidedMissileMovementComponent::TickComponent(float DeltaTime, ELevelTick 
 		return;
 	}
 
-	if (targetActor == nullptr)
-	{
-		return;
-	}
-
 	if (bIsEngineOn)
 	{
 		RotateTowardsTarget(DeltaTime);
@@ -60,15 +55,7 @@ void UGuidedMissileMovementComponent::BeginPlay()
 
 void UGuidedMissileMovementComponent::RotateTowardsTarget(float DeltaTime)
 {
-	FVector headingLocation;
-	if (bUseTargetActorLocation)
-	{
-		headingLocation = targetActor->GetActorLocation();
-	}
-	else
-	{
-		headingLocation = targetLocation;
-	}
+	FVector headingLocation = targetLocation;
 
 	FVector headingVector = headingLocation - GetOwner()->GetActorLocation();
 	FRotator targetRotation = headingVector.Rotation();
@@ -108,24 +95,13 @@ void UGuidedMissileMovementComponent::SetIsEngineOn(bool isOn)
 	bIsEngineOn = isOn;
 }
 
-AActor* UGuidedMissileMovementComponent::GetTargetActor() const
+void UGuidedMissileMovementComponent::RequestMovementTowardsActor(AActor* actor)
 {
-	return targetActor;
-}
-
-void UGuidedMissileMovementComponent::SetTargetActor(AActor* actor)
-{
-	targetActor = actor;
-}
-
-void UGuidedMissileMovementComponent::RequestMovementTowardsTargetActor()
-{
-	bUseTargetActorLocation = true;
+	RequestMovementTowardsLocation(actor->GetActorLocation());
 }
 
 void UGuidedMissileMovementComponent::RequestMovementTowardsLocation(const FVector& location)
 {
-	bUseTargetActorLocation = false;
 	targetLocation = location;
 }
 

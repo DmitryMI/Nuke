@@ -30,14 +30,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Movement|Runtime")
 	bool bIsMovementFrozen = false;
 
-	UPROPERTY(VisibleAnywhere, Category="Runtime")
-	AActor* targetActor;
-
 	UPROPERTY(VisibleAnywhere, Category = "Runtime")
 	FVector targetLocation;
-
-	UPROPERTY(VisibleAnywhere, Category = "Runtime")
-	bool bUseTargetActorLocation = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Runtime")
 	bool bIsEngineOn = true;
@@ -56,9 +50,7 @@ protected:
 public:
 	void SetIsEngineOn(bool isOn);
 
-	AActor* GetTargetActor() const;
-	void SetTargetActor(AActor* actor);
-	void RequestMovementTowardsTargetActor();
+	void RequestMovementTowardsActor(AActor* actor);
 	void RequestMovementTowardsLocation(const FVector& location);
 
 	void FreezeMovement();
