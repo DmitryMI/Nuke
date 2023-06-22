@@ -97,6 +97,10 @@ void UGuidedMissileMovementComponent::SetIsEngineOn(bool isOn)
 
 void UGuidedMissileMovementComponent::RequestMovementTowardsActor(AActor* actor)
 {
+	if (!actor)
+	{
+		return;
+	}
 	RequestMovementTowardsLocation(actor->GetActorLocation());
 }
 

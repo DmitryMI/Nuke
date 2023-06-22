@@ -15,10 +15,6 @@ void AMissile::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChan
 	{
 		bodyCollider->SetCapsuleHalfHeight(bodyLength / 2);
 	}
-	else if (PropertyChangedEvent.Property->GetName() == "proximityFuseTriggerRange")
-	{
-		proximityCollider->SetSphereRadius(proximityFuseTriggerRange);
-	}
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
@@ -39,11 +35,6 @@ AMissile::AMissile()
 	bodyCollider->SetCollisionProfileName("Pawn");
 	bodyCollider->SetRelativeRotation(FRotator(-90, 0, 0));
 	bodyCollider->SetupAttachment(RootComponent);
-
-	proximityCollider = CreateDefaultSubobject<USphereComponent>("ProximityColliderComponent");
-	proximityCollider->SetSphereRadius(proximityFuseTriggerRange);
-	proximityCollider->SetCollisionProfileName("RadarQuery");
-	proximityCollider->SetupAttachment(RootComponent);
 }
 
 void AMissile::OnDestructionDelayExpired()
@@ -63,9 +54,6 @@ void AMissile::BeginPlay()
 	Super::BeginPlay();
 	
 	bodyCollider->OnComponentBeginOverlap.AddDynamic(this, &AMissile::OnBodyOverlapBegin);
-	proximityCollider->OnComponentBeginOverlap.AddDynamic(this, &AMissile::OnProximityFuseCollisionBegin);
-
-	bodyCollider->OnComponentHit.AddDynamic(this, &AMissile::OnBodyHit);
 
 	IGenericTeamAgentInterface* teamAgent = GetInstigator<IGenericTeamAgentInterface>();
 	if (teamAgent)
@@ -115,33 +103,6 @@ void AMissile::OnBodyOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 	Detonate();
 }
 
-void AMissile::OnProximityFuseCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(OtherActor);
-	if (!teamAgent)
-	{
-		return;
-	}
-
-	if (teamAgent->GetTeamAttitudeTowards(*this) != ETeamAttitude::Hostile)
-	{
-		return;
-	}
-
-	IAttackable* attackable = Cast<IAttackable>(OtherActor);
-	if (!attackable)
-	{
-		return;
-	}
-
-	if (!attackable->IsAlive())
-	{
-		return;
-	}
-
-	Detonate();
-}
-
 FMissileDestroyedEvent& AMissile::OnMissileDestroyed()
 {
 	return missileDestroyedEvent;
@@ -152,6 +113,7 @@ void AMissile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//for(AActor* actor : G)
 }
 
 
@@ -210,4 +172,9 @@ void AMissile::SetGenericTeamId(const FGenericTeamId& team)
 FGenericTeamId AMissile::GetGenericTeamId() const
 {
 	return teamId;
+}
+
+float AMissile::GetProximityFuseTriggerRange() const
+{
+	return proximityFuseTriggerRange;
 }

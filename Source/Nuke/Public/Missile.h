@@ -38,39 +38,36 @@ private:
 	float bodyLength = 200;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-		float maxLifetime = 20.0f;
+	float maxLifetime = 20.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
-		USphereComponent* proximityCollider;
-
-	UPROPERTY(EditAnywhere, Category = "Weapon")
-		TSubclassOf<AExplosion> explosionType;
+	TSubclassOf<AExplosion> explosionType;
 
 	UPROPERTY(EditAnywhere, Category = "Physics")
-		UCapsuleComponent* bodyCollider;
+	UCapsuleComponent* bodyCollider;
 
 	UPROPERTY(VisibleAnywhere, Category = "Team")
-		FGenericTeamId teamId = FGenericTeamId::NoTeam;
+	FGenericTeamId teamId = FGenericTeamId::NoTeam;
 
 	UPROPERTY(VisibleAnywhere)
-		bool bIsAlive = true;
+	bool bIsAlive = true;
 
 	UPROPERTY(EditDefaultsOnly)
-		float destructionDelay = 5.0f;
+	float destructionDelay = 5.0f;
 
 	UPROPERTY()
-		FTimerHandle destructionTimerHandle;
+	FTimerHandle destructionTimerHandle;
 
 	UPROPERTY()
-		FTimerHandle lifetimeTimerHandle;
+	FTimerHandle lifetimeTimerHandle;
 
 	FMissileDestroyedEvent missileDestroyedEvent;
 
 	UFUNCTION()
-		void OnDestructionDelayExpired();
+	void OnDestructionDelayExpired();
 
 	UFUNCTION()
-		void OnLifetimeExpired();
+	void OnLifetimeExpired();
 
 public:
 	// Sets default values for this pawn's properties
@@ -85,9 +82,6 @@ protected:
 
 	UFUNCTION()
 	virtual void OnBodyOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	virtual void OnProximityFuseCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 
 #if WITH_EDITOR  
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -114,4 +108,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FGenericTeamId GetGenericTeamId() const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetProximityFuseTriggerRange() const;
 };

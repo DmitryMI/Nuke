@@ -34,11 +34,6 @@ void AAntiAirMissile::OnBodyOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	Super::OnBodyOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
 
-void AAntiAirMissile::OnProximityFuseCollisionBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	Super::OnProximityFuseCollisionBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-}
-
 bool AAntiAirMissile::IsActorInsideRadarCone(AActor* actor) const
 {
 	FVector direction = actor->GetActorLocation() - GetActorLocation();
@@ -82,6 +77,20 @@ void AAntiAirMissile::Tick(float DeltaTime)
 				SetLockedOnTarget(decoy);
 				break;
 			}
+		}
+	}
+
+	TArray<AActor*> threats;
+	GetTrackedThreats(threats);
+	double fuseRangeSq = FMath::Square(GetProximityFuseTriggerRange());
+	for (AActor* actor : threats)
+	{
+		FVector direction = actor->GetActorLocation() - GetActorLocation();
+		double distanceSq = direction.SizeSquared();
+		if (distanceSq < fuseRangeSq)
+		{
+			Detonate();
+			break;
 		}
 	}
 }
