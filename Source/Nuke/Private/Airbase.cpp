@@ -47,6 +47,23 @@ AFighter* AAirbase::LaunchFigher()
 	return Cast<AFighter>(aircraft);
 }
 
+ABomber* AAirbase::LaunchBomber()
+{
+	if (bombersNumber == 0)
+	{
+		return nullptr;
+	}
+
+	AAircraft* aircraft = LaunchAircraft(bomberType);
+	if (!aircraft)
+	{
+		return nullptr;
+	}
+
+	bombersNumber--;
+	return Cast<ABomber>(aircraft);
+}
+
 AAircraft* AAirbase::LaunchAircraft(TSubclassOf<AAircraft> aircraftType)
 {
 	if (!bIsLaunchReady)
@@ -89,9 +106,19 @@ int AAirbase::GetNumberOfFighters() const
 	return fightersNumber;
 }
 
+int AAirbase::GetNumberOfBombers() const
+{
+	return bombersNumber;
+}
+
 void AAirbase::SetNumberOfFighters(int number)
 {
 	fightersNumber = number;
+}
+
+void AAirbase::SetNumberOfBombers(int number)
+{
+	bombersNumber = number;
 }
 
 FGenericTeamId AAirbase::GetGenericTeamId() const

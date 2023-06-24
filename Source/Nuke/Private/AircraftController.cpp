@@ -246,7 +246,7 @@ int AAircraftController::GetNumMissilesTargetingActor(AActor* actor) const
 	{
 		for (AAntiAirMissile* missile : fighter->GetManagedAntiAirMissiles())
 		{
-			if (missile->GetLockedOnTarget() == actor)
+			if (missile->GetLockedOnTarget() == actor && missile->IsAlive())
 			{
 				counter++;
 			}

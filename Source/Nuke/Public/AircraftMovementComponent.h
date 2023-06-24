@@ -93,6 +93,8 @@ public:
 
 	float GetCurrentSpeed() const;
 
+	void SetCurrentSpeed(float speed);
+
 	void FreezeMovement();
 
 	virtual float GetMaxSpeed() const override;

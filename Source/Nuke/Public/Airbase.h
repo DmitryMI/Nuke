@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Fighter.h"
+#include "Bomber.h"
 #include "Attackable.h"
 #include "GenericTeamAgentInterface.h"
 #include "Airbase.generated.h"
@@ -17,8 +18,13 @@ class NUKE_API AAirbase : public APawn, public IAttackable, public IGenericTeamA
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AFighter> fighterType;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AFighter> bomberType;
+
 	UPROPERTY(EditAnywhere)
 	int fightersNumber = 5;
+
+	int bombersNumber = 5;
 
 	UPROPERTY(EditDefaultsOnly)
 	float launchCooldownTime = 3.0f;
@@ -57,10 +63,19 @@ public:
 	AFighter* LaunchFigher();
 
 	UFUNCTION(BlueprintCallable)
+	ABomber* LaunchBomber();
+
+	UFUNCTION(BlueprintCallable)
 	int GetNumberOfFighters() const;
 
 	UFUNCTION(BlueprintCallable)
+	int GetNumberOfBombers() const;
+
+	UFUNCTION(BlueprintCallable)
 	void SetNumberOfFighters(int number);
+
+	UFUNCTION(BlueprintCallable)
+	void SetNumberOfBombers(int number);
 
 	UFUNCTION(BlueprintCallable)
 	FGenericTeamId GetGenericTeamId() const override;

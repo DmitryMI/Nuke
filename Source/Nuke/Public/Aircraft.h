@@ -29,6 +29,9 @@ private:
 	float health = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly)
+	float stealthFactor = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly)
 	float flaresCooldown = 0.25f;
 
 	bool bFlaresReady = true;
@@ -146,4 +149,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetActiveFlayersCount() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual float GetStealthFactor() const override;
 };

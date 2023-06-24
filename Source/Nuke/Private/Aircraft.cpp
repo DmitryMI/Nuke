@@ -297,3 +297,8 @@ int AAircraft::GetActiveFlayersCount() const
 {
 	return flaresActive.Num();
 }
+
+float AAircraft::GetStealthFactor() const
+{
+	return stealthFactor;
+}

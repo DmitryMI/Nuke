@@ -34,6 +34,12 @@ AFighter::AFighter() : Super()
 
 AAntiAirMissile* AFighter::LaunchAntiAirMissile(AActor* shootTarget)
 {
+	if (!antiAirMissileType)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AntiAirMissileType not set!"));
+		return nullptr;
+	}
+
 	if (!bIsAntiAirMissileReady)
 	{
 		return nullptr;

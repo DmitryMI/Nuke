@@ -242,6 +242,11 @@ float UAircraftMovementComponent::GetCurrentSpeed() const
 	return currentSpeed;
 }
 
+void UAircraftMovementComponent::SetCurrentSpeed(float speed)
+{
+	currentSpeed = speed;
+}
+
 void UAircraftMovementComponent::FreezeMovement()
 {
 	bIsMovementFrozen = true;
