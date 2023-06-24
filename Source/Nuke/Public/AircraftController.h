@@ -7,6 +7,9 @@
 #include "AircraftWaypoint.h"
 #include "AirPath.h"
 #include "RadarDetectorComponent.h"
+#include "PlaytimeGameState.h"
+#include "PlaytimePlayerState.h"
+#include "Fighter.h"
 #include "AircraftController.generated.h"
 
 class AAirbase;
@@ -86,4 +89,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void MakePathToLocationAndFollow(const FVector& location);
+
+	UFUNCTION(BlueprintCallable)
+	AActor* GetEngagedTarget() const;
+
+	UFUNCTION(BlueprintCallable)
+	int GetNumberOfUnitsTargetingActor(AActor* targetActor) const;
+
+	UFUNCTION(BlueprintCallable)
+	AActor* SuggestBestTarget(TArray<AActor*> possibleTargets) const;
+
+	UFUNCTION(BlueprintCallable)
+	int GetNumMissilesTargetingActor(AActor* actor) const;
 };

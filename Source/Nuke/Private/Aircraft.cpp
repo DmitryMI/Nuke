@@ -4,6 +4,7 @@
 #include "Aircraft.h"
 #include "RadarComponent.h"
 #include "AirBase.h"
+#include "PlaytimeGameState.h"
 
 #if WITH_EDITOR  
 
@@ -66,6 +67,12 @@ void AAircraft::BeginPlay()
 	{
 		radarDetector = GetComponentByClass<URadarDetectorComponent>();
 	}
+
+	APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();
+	check(gameState);
+	APlaytimePlayerState* playerState = gameState->GetPlayerStateByTeam(teamId);
+	check(playerState);
+	playerState->GetPlayerUnitsMutable().Add(this);
 }
 
 void AAircraft::DestroyDelayed()
@@ -75,6 +82,12 @@ void AAircraft::DestroyDelayed()
 		return;
 	}
 
+	APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();
+	check(gameState);
+	APlaytimePlayerState* playerState = gameState->GetPlayerStateByTeam(teamId);
+	check(playerState);
+	playerState->GetPlayerUnitsMutable().Remove(this);
+	
 	bIsAlive = false;
 	aircraftMovement->FreezeMovement();
 

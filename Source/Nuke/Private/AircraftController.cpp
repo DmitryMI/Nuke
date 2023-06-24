@@ -4,6 +4,7 @@
 #include "AircraftController.h"
 #include "Aircraft.h"
 #include "Missile.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "AircraftMovementComponent.h"
 
 void AAircraftController::BeginPlay()
@@ -190,5 +191,67 @@ void AAircraftController::MakePathToLocationAndFollow(const FVector& location)
 	pathObject->SetWaypoints(pathToLocation);
 
 	SetFollowedPath(pathObject);
+}
+
+AActor* AAircraftController::GetEngagedTarget() const
+{
+	const UBlackboardComponent* blackboard = GetBlackboardComponent();
+	return Cast<AActor>(blackboard->GetValueAsObject("DogfightTargetAircraft"));
+}
+
+int AAircraftController::GetNumberOfUnitsTargetingActor(AActor* targetActor) const
+{
+	int result = 0;
+
+	APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();
+	check(gameState);
+	APlaytimePlayerState* playerState = gameState->GetPlayerStateByTeam(GetGenericTeamId());
+	check(playerState);
+
+	for (AActor* unit : playerState->GetPlayerUnits())
+	{
+		APawn* pawn = Cast<APawn>(unit);
+		AAircraftController* controller = pawn->GetController<AAircraftController>();
+		if (controller->GetEngagedTarget() == targetActor)
+		{
+			result++;
+		}
+	}
+	return result;
+}
+
+AActor* AAircraftController::SuggestBestTarget(TArray<AActor*> possibleTargets) const
+{
+	if (possibleTargets.Num() == 0)
+	{
+		return nullptr;
+	}
+
+	for (AActor* actor : possibleTargets)
+	{
+		int alliesEngaged = GetNumberOfUnitsTargetingActor(actor);
+		if (alliesEngaged == 0)
+		{
+			return actor;
+		}
+	}
+
+	return possibleTargets[0];
+}
+
+int AAircraftController::GetNumMissilesTargetingActor(AActor* actor) const
+{
+	int counter = 0;
+	if (AFighter* fighter = Cast<AFighter>(GetPawn()))
+	{
+		for (AAntiAirMissile* missile : fighter->GetManagedAntiAirMissiles())
+		{
+			if (missile->GetLockedOnTarget() == actor)
+			{
+				counter++;
+			}
+		}
+	}
+	return counter;
 }
 
