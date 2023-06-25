@@ -6,6 +6,7 @@
 #include "Missile.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AircraftMovementComponent.h"
+#include "AIUtils.h"
 
 void AAircraftController::BeginPlay()
 {
@@ -201,23 +202,8 @@ AActor* AAircraftController::GetEngagedTarget() const
 
 int AAircraftController::GetNumberOfUnitsTargetingActor(AActor* targetActor) const
 {
-	int result = 0;
-
-	APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();
-	check(gameState);
-	APlaytimePlayerState* playerState = gameState->GetPlayerStateByTeam(GetGenericTeamId());
-	check(playerState);
-
-	for (AActor* unit : playerState->GetPlayerUnits())
-	{
-		APawn* pawn = Cast<APawn>(unit);
-		AAircraftController* controller = pawn->GetController<AAircraftController>();
-		if (controller->GetEngagedTarget() == targetActor)
-		{
-			result++;
-		}
-	}
-	return result;
+	AAircraftController* self = const_cast<AAircraftController*>(this);
+	return UAIUtils::GetNumberOfUnitsTargetingActor(self, targetActor);
 }
 
 AActor* AAircraftController::SuggestBestTarget(TArray<AActor*> possibleTargets) const
@@ -253,5 +239,10 @@ int AAircraftController::GetNumMissilesTargetingActor(AActor* actor) const
 		}
 	}
 	return counter;
+}
+
+bool AAircraftController::IsTargetEngaged(AActor* targetActor) const
+{
+	return targetActor == GetEngagedTarget();
 }
 

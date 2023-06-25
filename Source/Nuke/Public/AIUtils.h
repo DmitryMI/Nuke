@@ -69,4 +69,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	static bool GetTrackingMissiles(AActor* targetActor, TArray<AMissile*>& outMissiles);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static int GetNumberOfUnitsTargetingActor(AActor* teamContextActor, AActor* targetActor);
 };

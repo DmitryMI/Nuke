@@ -31,7 +31,7 @@ void AStrategicControlPawn::OnScrollVerticalAxis(float value)
 		return;
 	}
 
-	float factor = cameraZoom / cameraZoomMinMax.X;
+	float factor = 0.5 * cameraZoom / cameraZoomMinMax.X + 0.5;
 	float delta = cameraScrollingSpeed* GetWorld()->DeltaTimeSeconds * value * factor;
 
 	FVector location = GetActorLocation();
@@ -48,7 +48,7 @@ void AStrategicControlPawn::OnScrollHorizontalAxis(float value)
 		return;
 	}
 
-	float factor = cameraZoom / cameraZoomMinMax.X;
+	float factor = 0.5 * cameraZoom / cameraZoomMinMax.X + 0.5;
 
 	float delta = cameraScrollingSpeed * GetWorld()->DeltaTimeSeconds * value * factor;
 	FVector location = GetActorLocation();
@@ -70,8 +70,8 @@ void AStrategicControlPawn::OnCameraZoomAxis(float value)
 	{
 		return;
 	}
-
-	float zoom = cameraZoom - value * cameraZoomSpeed * GetWorld()->DeltaTimeSeconds;
+	float factor = 0.5 * cameraZoom / cameraZoomMinMax.X + 0.5;
+	float zoom = cameraZoom - value * cameraZoomSpeed * GetWorld()->DeltaTimeSeconds * factor;
 	SetZoom(zoom);
 }
 

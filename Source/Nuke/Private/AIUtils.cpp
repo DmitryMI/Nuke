@@ -6,6 +6,8 @@
 #include "Radar.h"
 #include "Kismet/GameplayStatics.h"
 #include "RadarDetectorComponent.h"
+#include "PlaytimeGameState.h"
+#include "CooperativeController.h"
 
 bool UAIUtils::AreEnemies(AActor* actor1, AActor* actor2)
 {
@@ -329,4 +331,35 @@ bool UAIUtils::GetTrackingMissiles(AActor* targetActor, TArray<AMissile*>& outMi
 	}
 
 	return detector->GetDetectedRadars(outMissiles);
+}
+
+int UAIUtils::GetNumberOfUnitsTargetingActor(AActor* teamContextActor, AActor* targetActor)
+{
+	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(teamContextActor);
+	if (!teamAgent)
+	{
+		return 0;
+	}
+
+	FGenericTeamId team = teamAgent->GetGenericTeamId();
+
+	UWorld* world = teamContextActor->GetWorld();
+
+	int result = 0;
+
+	APlaytimeGameState* gameState = world->GetGameState<APlaytimeGameState>();
+	check(gameState);
+	APlaytimePlayerState* playerState = gameState->GetPlayerStateByTeam(team);
+	check(playerState);
+
+	for (AActor* unit : playerState->GetPlayerUnits())
+	{
+		APawn* pawn = Cast<APawn>(unit);
+		ICooperativeController* coopController = pawn->GetController<ICooperativeController>();
+		if (coopController && coopController->IsTargetEngaged(targetActor))
+		{
+			result++;
+		}
+	}
+	return result;
 }

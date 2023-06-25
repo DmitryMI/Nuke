@@ -10,6 +10,7 @@
 #include "PlaytimeGameState.h"
 #include "PlaytimePlayerState.h"
 #include "Fighter.h"
+#include "CooperativeController.h"
 #include "AircraftController.generated.h"
 
 class AAirbase;
@@ -18,7 +19,7 @@ class AAirbase;
  * 
  */
 UCLASS()
-class NUKE_API AAircraftController : public AAIController
+class NUKE_API AAircraftController : public AAIController, public ICooperativeController
 {
 	GENERATED_BODY()
 	
@@ -101,4 +102,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetNumMissilesTargetingActor(AActor* actor) const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsTargetEngaged(AActor* targetActor) const override;
 };

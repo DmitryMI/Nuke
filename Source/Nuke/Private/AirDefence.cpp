@@ -4,6 +4,8 @@
 #include "AirDefence.h"
 #include "AIController.h"
 #include "BallisticMissile.h"
+#include "PlaytimeGameState.h"
+#include "PlaytimePlayerState.h"
 #include "AntiAirMissileController.h"
 
 bool AAirDefence::IsAlive() const
@@ -55,10 +57,21 @@ void AAirDefence::BeginPlay()
 	{
 		radarComponent = GetComponentByClass<URadarSphereComponent>();
 	}
+
+	APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();
+	check(gameState);
+	APlaytimePlayerState* playerState = gameState->GetPlayerStateByTeam(teamId);
+	check(playerState);
+	playerState->GetPlayerUnitsMutable().Add(this);
 }
 
 AActor* AAirDefence::Shoot(AActor* target)
 {
+	if (!ensure(target))
+	{
+		return nullptr;
+	}
+
 	if (!bIsWeaponReady)
 	{
 		return nullptr;
@@ -181,7 +194,7 @@ float AAirDefence::GetWeaponAcceleration() const
 	return weaponAcceleration;
 }
 
-const TArray<AAntiAirMissile*> AAirDefence::GetManagedMissiles() const
+const TArray<AAntiAirMissile*>& AAirDefence::GetManagedMissiles() const
 {
 	return managedMissiles;
 }

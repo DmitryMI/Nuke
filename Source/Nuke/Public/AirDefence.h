@@ -105,10 +105,9 @@ public:
 	float GetWeaponAcceleration() const;
 
 	UFUNCTION(BlueprintCallable)
-	const TArray<AAntiAirMissile*> GetManagedMissiles() const;
+	const TArray<AAntiAirMissile*>& GetManagedMissiles() const;
 
 	virtual bool IsAlive() const override;
 
 	virtual void ReceiveDamage(float damageAmount) override;
-
 };
