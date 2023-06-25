@@ -16,9 +16,20 @@ void AFighter::BeginPlay()
 	fighterRadar = GetComponentByClass<URadarConeComponent>();
 	ensure(fighterRadar);
 
-	fighterRadar->SetRadarRange(radarRange);
+	fighterRadar->SetTrackingRange(radarTrackingRange);
+	fighterRadar->SetVisibilityRange(radarTrackingRange);
 	fighterRadar->SetConeAngleDeg(radarConeAngle);
-	fighterRadar->SetDetectableMobilityType(EMobilityEnvironmentType::MET_Air);
+
+	int32 visibleMobilityFlags = 
+		(int)EMobilityEnvironmentType::MET_Air | 
+		(int)EMobilityEnvironmentType::MET_Ground |
+		(int)EMobilityEnvironmentType::MET_WaterSurface;
+
+	int32 trackableMobilityFlags =
+		(int)EMobilityEnvironmentType::MET_Air;
+
+	fighterRadar->SetVisibleMobilityFlags(visibleMobilityFlags);
+	fighterRadar->SetTrackableMobilityFlags(trackableMobilityFlags);
 }
 
 void AFighter::OnManagedMissileDestroyed(AMissile* sender)

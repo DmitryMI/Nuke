@@ -104,6 +104,7 @@ void AAntiAirMissile::SetLockedOnTarget(AActor* actor)
 AActor* AAntiAirMissile::GetLockedOnTarget() const
 {
 	AAntiAirMissileController* controller = GetController<AAntiAirMissileController>();
+	check(controller);
 	return controller->GetTarget();
 }
 

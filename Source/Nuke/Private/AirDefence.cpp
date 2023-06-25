@@ -43,9 +43,20 @@ AAirDefence::AAirDefence()
 	//RootComponent->RegisterComponent();
 
 	radarComponent = CreateDefaultSubobject<URadarSphereComponent>("RadarCollider");
-	radarComponent->SetRadarRange(weaponRange);
+	radarComponent->SetTrackingRange(weaponRange);
+	radarComponent->SetVisibilityRange(weaponRange);
 	radarComponent->SetupAttachment(RootComponent);
-	//radarCollider->RegisterComponent();
+
+	int32 visibleMobilityFlags =
+		(int)EMobilityEnvironmentType::MET_Air |
+		(int)EMobilityEnvironmentType::MET_Ground |
+		(int)EMobilityEnvironmentType::MET_WaterSurface;
+
+	int32 trackableMobilityFlags =
+		(int)EMobilityEnvironmentType::MET_Air;
+
+	radarComponent->SetTrackableMobilityFlags(trackableMobilityFlags);
+	radarComponent->SetVisibleMobilityFlags(visibleMobilityFlags);
 
 	fogOfWarComponent = CreateDefaultSubobject<UFogOfWarComponent>(TEXT("FogOfWar"));
 }
@@ -64,6 +75,17 @@ void AAirDefence::BeginPlay()
 	{
 		radarComponent = GetComponentByClass<URadarSphereComponent>();
 	}
+
+	int32 visibleMobilityFlags =
+		(int)EMobilityEnvironmentType::MET_Air |
+		(int)EMobilityEnvironmentType::MET_Ground |
+		(int)EMobilityEnvironmentType::MET_WaterSurface;
+
+	int32 trackableMobilityFlags =
+		(int)EMobilityEnvironmentType::MET_Air;
+
+	radarComponent->SetTrackableMobilityFlags(trackableMobilityFlags);
+	radarComponent->SetVisibleMobilityFlags(visibleMobilityFlags);
 
 	if (!fogOfWarComponent)
 	{
@@ -147,7 +169,7 @@ void AAirDefence::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyC
 {
 	if (PropertyChangedEvent.Property->GetName() == "weaponRange")
 	{
-		radarComponent->SetRadarRange(weaponRange);
+		radarComponent->SetTrackingRange(weaponRange);
 	}
 
 

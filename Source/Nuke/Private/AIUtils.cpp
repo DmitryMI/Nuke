@@ -363,3 +363,21 @@ int UAIUtils::GetNumberOfUnitsTargetingActor(AActor* teamContextActor, AActor* t
 	}
 	return result;
 }
+
+bool UAIUtils::CheckVisibility(AActor* sightSource, AActor* sightTarget)
+{
+	IGenericTeamAgentInterface* sightSourceTeamAgent = Cast<IGenericTeamAgentInterface>(sightSource);
+	if (!sightSourceTeamAgent)
+	{
+		return false;
+	}
+
+	IAttackable* targetAttackable = Cast<IAttackable>(sightTarget);
+	if (!targetAttackable)
+	{
+		return true;
+	}
+
+	UFogOfWarComponent* fowComponent = targetAttackable->GetFogOfWarComponent();
+	return fowComponent->IsVisibleForTeam(sightSourceTeamAgent->GetGenericTeamId());
+}

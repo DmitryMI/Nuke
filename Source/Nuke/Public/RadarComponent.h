@@ -20,16 +20,16 @@ private:
 	TArray<AActor*> threatsInRadarRange;
 
 	UPROPERTY(EditAnywhere)
-	float radarRange = 10000.0f;
-
-	UPROPERTY(EditAnywhere)
 	float trackingRange = 10000.0f;
 
 	UPROPERTY(EditAnywhere)
 	float visibilityRange = 10000.0f;
 
-	UPROPERTY(EditAnywhere)
-	EMobilityEnvironmentType detectableMobilityType = EMobilityEnvironmentType::MET_None;
+	UPROPERTY(EditAnywhere, meta = (Bitmask, BitmaskEnum = EMobilityEnvironmentType))
+	int32 trackableMobilityFlags = 0;
+
+	UPROPERTY(EditAnywhere, meta = (Bitmask, BitmaskEnum = EMobilityEnvironmentType))
+	int32 visibleMobilityFlags = 0;
 
 	UPROPERTY(EditAnywhere)
 	bool bNotifyRadarDetectors = true;
@@ -59,6 +59,11 @@ protected:
 	virtual bool IsRadarDetectorNotificationEnabled() const;
 
 	virtual void SetRadarDetectorNotificationEnabled(bool enabled);
+
+	virtual void UpdateVisibilityOfActorsInRange();
+
+	TArray<AActor*>& GetActorsInRadarRange();
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -78,14 +83,25 @@ public:
 	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual EMobilityEnvironmentType GetDetectableMobilityType() const;
+	virtual void SetTrackingRange(float range);
 
 	UFUNCTION(BlueprintCallable)
-	void SetDetectableMobilityType(EMobilityEnvironmentType mobilityType);
+	float GetTrackingRange() const;
 
 	UFUNCTION(BlueprintCallable)
-	virtual void SetRadarRange(float range);
+	virtual void SetVisibilityRange(float range);
 
 	UFUNCTION(BlueprintCallable)
-	float GetRadarRange() const;
+	float GetVisibilityRange() const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetRadarCollisionRadius() const;
+
+	int32 GetTrackableMobilityFlags() const;
+
+	int32 GetVisibleMobilityFlags() const;
+
+	void SetTrackableMobilityFlags(int32 flags);
+
+	void SetVisibleMobilityFlags(int32 flags);
 };

@@ -30,6 +30,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	virtual void SetRadarRange(float radarRadius) override;
+	virtual void SetTrackingRange(float radarRadius) override;
 
 };

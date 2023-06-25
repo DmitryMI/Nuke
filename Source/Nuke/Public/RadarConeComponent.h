@@ -31,8 +31,13 @@ protected:
 	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
 
 	virtual void BeginPlay() override;
+
+	virtual void UpdateVisibilityOfActorsInRange() override;
+
+	bool IsInsideConeAngle(const FVector& location) const;
+
 public:
-	virtual void SetRadarRange(float radarRadius) override;
+	virtual void SetTrackingRange(float radarRadius) override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetConeAngleDeg(float angleDeg);

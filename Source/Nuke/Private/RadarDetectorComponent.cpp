@@ -39,30 +39,31 @@ void URadarDetectorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 
 void URadarDetectorComponent::NotifyDetection(const AActor* sender)
 {
-	AActor* actor = const_cast<AActor*>(sender);
+	AActor* actorSender = const_cast<AActor*>(sender);
 
 	if (detectedIrradiators.Contains(sender))
 	{
 		FRadarDetectionInfo& info = detectedIrradiators[sender];
 		info.UpdateTimestamp = GetWorld()->GetTimeSeconds();
-		onRadarDetectorNotification.Broadcast(this, actor, info);
+		onRadarDetectorNotification.Broadcast(this, actorSender, info);
 	}
 	else
 	{
 		FRadarDetectionInfo info;
-		info.Irradiator = actor;
+		info.Irradiator = actorSender;
 		info.DetectionTimestamp = GetWorld()->GetTimeSeconds();
 		info.UpdateTimestamp = GetWorld()->GetTimeSeconds();
-		detectedIrradiators.Add(actor, info);
-		onRadarDetectorNotification.Broadcast(this, actor, info);
+		detectedIrradiators.Add(actorSender, info);
+		onRadarDetectorNotification.Broadcast(this, actorSender, info);
 	}
 
-	IAttackable* ownerAttackable = GetOwner<IAttackable>();
+	IAttackable* senderAttackable = Cast<IAttackable>(actorSender);
 	IGenericTeamAgentInterface* ownerTeamAgent = GetOwner<IGenericTeamAgentInterface>();
-	UFogOfWarComponent* fowComponent = ownerAttackable->GetFogOfWarComponent();
-	if (fowComponent && ownerTeamAgent)
+
+	UFogOfWarComponent* senderFowComponent = senderAttackable->GetFogOfWarComponent();
+	if (senderFowComponent && ownerTeamAgent)
 	{
-		fowComponent->WitnessUnconditional(ownerTeamAgent->GetGenericTeamId());
+		senderFowComponent->WitnessUnconditional(ownerTeamAgent->GetGenericTeamId());
 	}
 }
 

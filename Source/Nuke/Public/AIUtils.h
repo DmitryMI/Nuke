@@ -72,4 +72,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	static int GetNumberOfUnitsTargetingActor(AActor* teamContextActor, AActor* targetActor);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	static bool CheckVisibility(AActor* sightSource, AActor* sightTarget);
 };

@@ -30,10 +30,13 @@ private:
 	float antiAirMissileCooldown= 2.0f;
 
 	UPROPERTY(EditDefaultsOnly)
-	float radarRange = 50000.0f;
+	float radarTrackingRange = 50000.0f;
 
 	UPROPERTY(EditDefaultsOnly)
-	float radarConeAngle = 45.0f;
+	float radarVisibilityRange = 5000.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float radarConeAngle = 15.0f;
 
 	UPROPERTY(EditAnywhere)
 	URadarConeComponent* fighterRadar;
@@ -67,6 +70,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool HasAntiAirMissiles() const;
-
-	
 };

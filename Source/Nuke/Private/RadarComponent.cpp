@@ -154,12 +154,9 @@ bool URadarComponent::TryTrackAndNotify(AActor* actor) const
 		return false;
 	}
 
-	if (detectableMobilityType != EMobilityEnvironmentType::MET_None)
+	if (((int)attackable->GetMobilityEnvironmentType() & trackableMobilityFlags) == 0)
 	{
-		if (attackable->GetMobilityEnvironmentType() != detectableMobilityType)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	FVector radarLocation = GetOwner()->GetActorLocation() + GetRelativeLocation();
@@ -172,7 +169,7 @@ bool URadarComponent::TryTrackAndNotify(AActor* actor) const
 	// If detectionRangeFactor is 1.0, we don't need to recalculate the distance
 	if (detectionRangeFactor < 1.0)
 	{
-		double detectionRange = GetRadarRange() * detectionRangeFactor;
+		double detectionRange = GetTrackingRange() * detectionRangeFactor;
 		if (distanceSq > FMath::Square(detectionRange))
 		{
 			return false;
@@ -218,15 +215,18 @@ void URadarComponent::SetRadarDetectorNotificationEnabled(bool enabled)
 	bNotifyRadarDetectors = enabled;
 }
 
-
-// Called every frame
-void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void URadarComponent::UpdateVisibilityOfActorsInRange()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	for (AActor* actorInRange : threatsInRadarRange)
 	{
-		UFogOfWarComponent* fow = actorInRange->GetComponentByClass<UFogOfWarComponent>();
+		IAttackable* attackable = Cast<IAttackable>(actorInRange);
+
+		if (((int)attackable->GetMobilityEnvironmentType() & visibleMobilityFlags) == 0)
+		{
+			continue;
+		}
+
+		UFogOfWarComponent* fow = attackable->GetFogOfWarComponent();
 		if (!fow)
 		{
 			continue;
@@ -234,6 +234,20 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 		fow->WitnessIfHasLineOfSight(GetOwner(), visibilityRange);
 	}
+}
+
+TArray<AActor*>& URadarComponent::GetActorsInRadarRange()
+{
+	return threatsInRadarRange;
+}
+
+
+// Called every frame
+void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	UpdateVisibilityOfActorsInRange();
 }
 
 TArray<AActor*> URadarComponent::GetTrackedThreatsArray() const
@@ -281,24 +295,49 @@ bool URadarComponent::IsActorTrackedByRadar(AActor* actor) const
 	return TryTrackAndNotify(actor);
 }
 
-EMobilityEnvironmentType URadarComponent::GetDetectableMobilityType() const
+void URadarComponent::SetTrackingRange(float range)
 {
-	return detectableMobilityType;
+	trackingRange = range;
 }
 
-void URadarComponent::SetDetectableMobilityType(EMobilityEnvironmentType mobilityType)
+float URadarComponent::GetTrackingRange() const
 {
-	detectableMobilityType = mobilityType;
+	return trackingRange;
 }
 
-void URadarComponent::SetRadarRange(float range)
+void URadarComponent::SetVisibilityRange(float range)
 {
-	radarRange = range;
+	trackingRange = range;
 }
 
-float URadarComponent::GetRadarRange() const
+float URadarComponent::GetVisibilityRange() const
 {
-	return radarRange;
+	return trackingRange;
+}
+
+float URadarComponent::GetRadarCollisionRadius() const
+{
+	return FMath::Max(visibilityRange, trackingRange);
+}
+
+int32 URadarComponent::GetTrackableMobilityFlags() const
+{
+	return trackableMobilityFlags;
+}
+
+int32 URadarComponent::GetVisibleMobilityFlags() const
+{
+	return visibleMobilityFlags;
+}
+
+void URadarComponent::SetTrackableMobilityFlags(int32 flags)
+{
+	trackableMobilityFlags = flags;
+}
+
+void URadarComponent::SetVisibleMobilityFlags(int32 flags)
+{
+	visibleMobilityFlags = flags;
 }
 
 
