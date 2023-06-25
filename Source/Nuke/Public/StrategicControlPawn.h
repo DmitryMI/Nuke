@@ -16,13 +16,13 @@ private:
 	float cameraScrollingSpeed = 1000.0f;
 
 	UPROPERTY(EditAnywhere)
-	float cameraZoomSpeed = 2000.0f;
+	float cameraZoomSpeed = 5000.0f;
 
 	UPROPERTY(EditAnywhere)
-	FVector2D cameraZoomMinMax = FVector2D(500.0f, 10000.0f);
+	FVector2D cameraZoomMinMax = FVector2D(500.0f, 100000.0f);
 
 	UPROPERTY(EditAnywhere)
-	float cameraZoom = 5000.0f;
+	float cameraZoom = 50000.0f;
 
 	UPROPERTY(EditAnywhere)
 	float cameraOriginZ = 0.0f;

@@ -44,7 +44,7 @@ AActor* AAirDefenceController::SuggestBestTarget(TArray<AActor*> possibleTargets
 	for (AActor* actor : possibleTargets)
 	{
 		int missilesEngaged = GetNumOwnMissilesTargetingActor(actor);
-		if (missilesEngaged >= 2)
+		if (missilesEngaged > 0)
 		{
 			continue;
 		}
@@ -65,16 +65,24 @@ AActor* AAirDefenceController::SuggestBestTarget(TArray<AActor*> possibleTargets
 int AAirDefenceController::GetNumOwnMissilesTargetingActor(AActor* actor) const
 {
 	int counter = 0;
-	if (AAirDefence* airDefence = Cast<AAirDefence>(GetPawn()))
+	AAirDefence* airDefence = GetPawn<AAirDefence>();
+	if (!airDefence)
 	{
-		for (AAntiAirMissile* missile : airDefence->GetManagedMissiles())
+		return 0;
+	}
+
+	for (AAntiAirMissile* missile : airDefence->GetManagedMissiles())
+	{
+		if (!missile || !missile->IsAlive())
 		{
-			if (missile->GetLockedOnTarget() == actor && missile->IsAlive())
-			{
-				counter++;
-			}
+			continue;
+		}
+		if (missile->GetLockedOnTarget() == actor)
+		{
+			counter++;
 		}
 	}
+
 	return counter;
 }
 
