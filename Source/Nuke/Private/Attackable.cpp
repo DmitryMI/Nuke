@@ -23,3 +23,8 @@ float IAttackable::GetStealthFactor() const
 {
     return 0.0f;
 }
+
+UFogOfWarComponent* IAttackable::GetFogOfWarComponent() const
+{
+    return nullptr;
+}

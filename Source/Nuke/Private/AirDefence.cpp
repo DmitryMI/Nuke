@@ -17,6 +17,11 @@ void AAirDefence::ReceiveDamage(float damageAmount)
 {
 }
 
+UFogOfWarComponent* AAirDefence::GetFogOfWarComponent() const
+{
+	return fogOfWarComponent;
+}
+
 void AAirDefence::OnCooldownExpired()
 {
 	bIsWeaponReady = true;
@@ -41,6 +46,8 @@ AAirDefence::AAirDefence()
 	radarComponent->SetRadarRange(weaponRange);
 	radarComponent->SetupAttachment(RootComponent);
 	//radarCollider->RegisterComponent();
+
+	fogOfWarComponent = CreateDefaultSubobject<UFogOfWarComponent>(TEXT("FogOfWar"));
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +63,11 @@ void AAirDefence::BeginPlay()
 	if (!radarComponent)
 	{
 		radarComponent = GetComponentByClass<URadarSphereComponent>();
+	}
+
+	if (!fogOfWarComponent)
+	{
+		fogOfWarComponent = GetComponentByClass<UFogOfWarComponent>();
 	}
 
 	APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();

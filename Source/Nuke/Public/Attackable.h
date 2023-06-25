@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "MobilityEnvironmentType.h"
+#include "FogOfWarComponent.h"
 #include "Attackable.generated.h"
 
 // This class does not need to be modified.
@@ -30,4 +31,6 @@ public:
 	virtual EMobilityEnvironmentType GetMobilityEnvironmentType() const;
 
 	virtual float GetStealthFactor() const;
+
+	virtual UFogOfWarComponent* GetFogOfWarComponent() const;
 };

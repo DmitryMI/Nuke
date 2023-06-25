@@ -5,6 +5,7 @@
 #include "RadarComponent.h"
 #include "Attackable.h"
 #include "GenericTeamAgentInterface.h"
+#include "FogOfWarComponent.h"
 
 // Sets default values for this component's properties
 URadarDetectorComponent::URadarDetectorComponent()
@@ -54,6 +55,14 @@ void URadarDetectorComponent::NotifyDetection(const AActor* sender)
 		info.UpdateTimestamp = GetWorld()->GetTimeSeconds();
 		detectedIrradiators.Add(actor, info);
 		onRadarDetectorNotification.Broadcast(this, actor, info);
+	}
+
+	IAttackable* ownerAttackable = GetOwner<IAttackable>();
+	IGenericTeamAgentInterface* ownerTeamAgent = GetOwner<IGenericTeamAgentInterface>();
+	UFogOfWarComponent* fowComponent = ownerAttackable->GetFogOfWarComponent();
+	if (fowComponent && ownerTeamAgent)
+	{
+		fowComponent->WitnessUnconditional(ownerTeamAgent->GetGenericTeamId());
 	}
 }
 

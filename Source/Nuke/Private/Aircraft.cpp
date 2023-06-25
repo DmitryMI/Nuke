@@ -50,6 +50,8 @@ AAircraft::AAircraft()
 
 	aircraftMovement = CreateDefaultSubobject<UAircraftMovementComponent>(TEXT("AircraftMovementComponent"));
 	radarDetector = CreateDefaultSubobject<URadarDetectorComponent>(TEXT("RadarDetectorComponent"));
+	fogOfWarComponent = CreateDefaultSubobject<UFogOfWarComponent>(TEXT("FogOfWar"));
+
 }
 
 // Called when the game starts or when spawned
@@ -59,13 +61,17 @@ void AAircraft::BeginPlay()
 
 	if (!aircraftMovement)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("guidedMovement was nullptr!"));
 		aircraftMovement = GetComponentByClass<UAircraftMovementComponent>();
 	}
 
 	if (!radarDetector)
 	{
 		radarDetector = GetComponentByClass<URadarDetectorComponent>();
+	}
+
+	if (!fogOfWarComponent)
+	{
+		fogOfWarComponent = GetComponentByClass<UFogOfWarComponent>();
 	}
 
 	APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();
@@ -301,4 +307,10 @@ int AAircraft::GetActiveFlayersCount() const
 float AAircraft::GetStealthFactor() const
 {
 	return stealthFactor;
+}
+
+UFogOfWarComponent* AAircraft::GetFogOfWarComponent() const
+{
+	check(fogOfWarComponent);
+	return fogOfWarComponent;
 }

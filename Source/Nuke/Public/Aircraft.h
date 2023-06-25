@@ -74,6 +74,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	FGenericTeamId teamId;
 
+	UPROPERTY(VisibleAnywhere)
+	UFogOfWarComponent* fogOfWarComponent;
+
 	UPROPERTY(EditDefaultsOnly)
 	float destroyDelay = 5.0f;
 
@@ -152,4 +155,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual float GetStealthFactor() const override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual UFogOfWarComponent* GetFogOfWarComponent() const override;
 };

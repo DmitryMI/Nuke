@@ -40,6 +40,9 @@ class NUKE_API AAirbase : public APawn, public IAttackable, public IGenericTeamA
 
 	FTimerHandle launchCooldownHandle;
 
+	UPROPERTY(VisibleAnywhere)
+	UFogOfWarComponent* fogOfWarComponent;
+
 	UFUNCTION()
 	void OnLauchStateCooldownExpired();
 public:
@@ -85,4 +88,5 @@ public:
 
 	virtual bool IsAlive() const override;
 
+	virtual UFogOfWarComponent* GetFogOfWarComponent() const;
 };

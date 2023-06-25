@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Explosion.h"
+#include "FogOfWarComponent.h"
 #include "Missile.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FMissileDestroyedEvent, AMissile*);
@@ -45,6 +46,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Physics")
 	UCapsuleComponent* bodyCollider;
+
+	UPROPERTY(VisibleAnywhere)
+	UFogOfWarComponent* fogOfWarComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "Team")
 	FGenericTeamId teamId = FGenericTeamId::NoTeam;

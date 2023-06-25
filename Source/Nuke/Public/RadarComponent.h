@@ -23,7 +23,16 @@ private:
 	float radarRange = 10000.0f;
 
 	UPROPERTY(EditAnywhere)
+	float trackingRange = 10000.0f;
+
+	UPROPERTY(EditAnywhere)
+	float visibilityRange = 10000.0f;
+
+	UPROPERTY(EditAnywhere)
 	EMobilityEnvironmentType detectableMobilityType = EMobilityEnvironmentType::MET_None;
+
+	UPROPERTY(EditAnywhere)
+	bool bNotifyRadarDetectors = true;
 
 public:	
 	// Sets default values for this component's properties
@@ -46,6 +55,10 @@ protected:
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	virtual bool TryTrackAndNotify(AActor* actor) const;
+
+	virtual bool IsRadarDetectorNotificationEnabled() const;
+
+	virtual void SetRadarDetectorNotificationEnabled(bool enabled);
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

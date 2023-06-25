@@ -120,7 +120,7 @@ void AAircraftController::DrawFollowedPath(float lineLifetime) const
 {
 	if (!GetPawn()->IsSelectedInEditor() && !IsSelectedInEditor())
 	{
-		//return;
+		return;
 	}
 
 	if (!HasValidPath())

@@ -54,6 +54,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TArray<AAntiAirMissile*> managedMissiles;
 
+	UPROPERTY(VisibleAnywhere)
+	UFogOfWarComponent* fogOfWarComponent;
+
 	UFUNCTION()
 	void OnCooldownExpired();
 
@@ -110,4 +113,6 @@ public:
 	virtual bool IsAlive() const override;
 
 	virtual void ReceiveDamage(float damageAmount) override;
+
+	virtual UFogOfWarComponent* GetFogOfWarComponent() const override;
 };

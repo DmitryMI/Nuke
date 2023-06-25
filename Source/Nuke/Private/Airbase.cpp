@@ -16,13 +16,18 @@ AAirbase::AAirbase()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	fogOfWarComponent = CreateDefaultSubobject<UFogOfWarComponent>(TEXT("FogOfWar"));
 }
 
 // Called when the game starts or when spawned
 void AAirbase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (!fogOfWarComponent)
+	{
+		fogOfWarComponent = GetComponentByClass<UFogOfWarComponent>();
+	}
 }
 
 bool AAirbase::IsReadyToLaunch() const
@@ -134,6 +139,12 @@ void AAirbase::SetGenericTeamId(const FGenericTeamId& team)
 bool AAirbase::IsAlive() const
 {
 	return bIsAlive;
+}
+
+UFogOfWarComponent* AAirbase::GetFogOfWarComponent() const
+{
+	check(fogOfWarComponent);
+	return fogOfWarComponent;
 }
 
 // Called every frame

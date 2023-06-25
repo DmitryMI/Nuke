@@ -4,6 +4,7 @@
 #include "RadarComponent.h"
 #include "Attackable.h"
 #include "RadarDetectorComponent.h"
+#include "FogOfWarComponent.h"
 
 // Sets default values for this component's properties
 URadarComponent::URadarComponent()
@@ -178,22 +179,43 @@ bool URadarComponent::TryTrackAndNotify(AActor* actor) const
 		}
 	}
 
-	TArray<FHitResult> hitResults;
+	FHitResult hitResult;
 	FCollisionQueryParams queryParams;
 	queryParams.AddIgnoredActor(GetOwner());
 	queryParams.AddIgnoredActor(actor);
-	GetWorld()->LineTraceMultiByProfile(hitResults, radarLocation, actorLocation, "RadarLineOfSight", queryParams);
-	if (hitResults.Num() != 0)
+	GetWorld()->LineTraceSingleByProfile(hitResult, radarLocation, actorLocation, "RadarLineOfSight", queryParams);
+	if (hitResult.bBlockingHit)
 	{
 		return false;
 	}
 
-	URadarDetectorComponent* radarDetector = actor->GetComponentByClass<URadarDetectorComponent>();
-	if (radarDetector)
+	UFogOfWarComponent* fow = actor->GetComponentByClass<UFogOfWarComponent>();
+	if (fow)
 	{
-		radarDetector->NotifyDetection(GetOwner());
+		IGenericTeamAgentInterface* teamAgent = GetOwner<IGenericTeamAgentInterface>();
+		check(teamAgent);
+		fow->WitnessUnconditional(teamAgent->GetGenericTeamId());
+	}
+
+	if (bNotifyRadarDetectors)
+	{
+		URadarDetectorComponent* radarDetector = actor->GetComponentByClass<URadarDetectorComponent>();
+		if (radarDetector)
+		{
+			radarDetector->NotifyDetection(GetOwner());
+		}
 	}
 	return true;
+}
+
+bool URadarComponent::IsRadarDetectorNotificationEnabled() const
+{
+	return bNotifyRadarDetectors;
+}
+
+void URadarComponent::SetRadarDetectorNotificationEnabled(bool enabled)
+{
+	bNotifyRadarDetectors = enabled;
 }
 
 
@@ -202,7 +224,16 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	for (AActor* actorInRange : threatsInRadarRange)
+	{
+		UFogOfWarComponent* fow = actorInRange->GetComponentByClass<UFogOfWarComponent>();
+		if (!fow)
+		{
+			continue;
+		}
+
+		fow->WitnessIfHasLineOfSight(GetOwner(), visibilityRange);
+	}
 }
 
 TArray<AActor*> URadarComponent::GetTrackedThreatsArray() const

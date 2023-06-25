@@ -35,6 +35,8 @@ AMissile::AMissile()
 	bodyCollider->SetCollisionProfileName("Pawn");
 	bodyCollider->SetRelativeRotation(FRotator(-90, 0, 0));
 	bodyCollider->SetupAttachment(RootComponent);
+
+	fogOfWarComponent = CreateDefaultSubobject<UFogOfWarComponent>(TEXT("FogOfWar"));
 }
 
 void AMissile::OnDestructionDelayExpired()
@@ -59,6 +61,11 @@ void AMissile::BeginPlay()
 	if (teamAgent)
 	{
 		SetGenericTeamId(teamAgent->GetGenericTeamId());
+	}
+
+	if (!fogOfWarComponent)
+	{
+		fogOfWarComponent = GetComponentByClass<UFogOfWarComponent>();
 	}
 
 	GetWorld()->GetTimerManager().SetTimer(
