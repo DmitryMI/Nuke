@@ -82,7 +82,9 @@ protected:
 
 	TArray<AActor*>& GetActorsInRadarRange();
 
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	virtual void DrawDebugRadarShape();
+#endif
 
 public:	
 	// Called every frame

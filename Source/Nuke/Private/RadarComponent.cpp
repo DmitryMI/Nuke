@@ -295,7 +295,7 @@ TArray<AActor*>& URadarComponent::GetActorsInRadarRange()
 {
 	return actorsInRadarRange;
 }
-
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 void URadarComponent::DrawDebugRadarShape()
 {
 	int segments = CVarRadarDrawShapesSegments.GetValueOnGameThread();
@@ -303,7 +303,7 @@ void URadarComponent::DrawDebugRadarShape()
 	DrawDebugSphere(GetWorld(), center, visibilityRange, segments, FColor::Cyan);
 	DrawDebugSphere(GetWorld(), center, trackingRange, segments, FColor::Magenta);
 }
-
+#endif
 
 // Called every frame
 void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -312,10 +312,12 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 	UpdateVisibilityOfActorsInRange();
 
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	if (CVarRadarDrawShapes.GetValueOnGameThread())
 	{
 		DrawDebugRadarShape();
 	}
+#endif
 }
 
 TArray<AActor*> URadarComponent::GetTrackedThreatsArray() const

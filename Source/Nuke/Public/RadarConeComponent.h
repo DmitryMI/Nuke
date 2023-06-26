@@ -36,7 +36,10 @@ protected:
 
 	virtual bool CanTrackActorInRadarRange(AActor* actor) const override;
 
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	virtual void DrawDebugRadarShape() override;
+#endif
+
 public:
 	virtual void SetTrackingRange(float radarRadius) override;
 

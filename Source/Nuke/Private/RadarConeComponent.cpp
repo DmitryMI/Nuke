@@ -78,6 +78,7 @@ bool URadarConeComponent::CanTrackActorInRadarRange(AActor* actor) const
 	return Super::CanTrackActorInRadarRange(actor);
 }
 
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 void URadarConeComponent::DrawDebugRadarShape()
 {
 	int segments = CVarRadarDrawShapesSegments.GetValueOnGameThread();
@@ -96,7 +97,7 @@ void URadarConeComponent::DrawDebugRadarShape()
 	);
 	//DrawDebugSphere(GetWorld(), center, trackingRange, segments, FColor::Magenta);
 }
-
+#endif
 void URadarConeComponent::SetTrackingRange(float radarRadius)
 {
 	Super::SetTrackingRange(radarRadius);
