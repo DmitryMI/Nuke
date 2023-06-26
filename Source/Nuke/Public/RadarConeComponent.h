@@ -28,13 +28,13 @@ protected:
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
-	virtual bool IsActorTrackedByRadar(AActor* actor) const override;
-
 	virtual void BeginPlay() override;
 
 	virtual void UpdateVisibilityOfActorsInRange() override;
 
 	bool IsInsideConeAngle(const FVector& location) const;
+
+	virtual bool TryTrackAndNotify(AActor* actor) const override;
 
 public:
 	virtual void SetTrackingRange(float radarRadius) override;

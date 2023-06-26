@@ -16,17 +16,6 @@ void URadarConeComponent::PostEditChangeProperty(struct FPropertyChangedEvent& P
 }
 #endif
 
-bool URadarConeComponent::IsActorTrackedByRadar(AActor* actor) const
-{
-	bool isInsideCone = IsInsideConeAngle(actor->GetActorLocation());;
-
-	if (!isInsideCone)
-	{
-		return false;
-	}
-
-	return Super::TryTrackAndNotify(actor);
-}
 
 void URadarConeComponent::BeginPlay()
 {
@@ -58,15 +47,7 @@ void URadarConeComponent::UpdateVisibilityOfActorsInRange()
 			continue;
 		}
 
-		if (IsInsideConeAngle(actorInRange->GetActorLocation()))
-		{
-			fow->WitnessIfHasLineOfSight(GetOwner(), GetTrackingRange());
-		}
-		else
-		{
-			fow->WitnessIfHasLineOfSight(GetOwner(), GetVisibilityRange());
-		}
-		
+		fow->WitnessIfHasLineOfSight(GetOwner(), GetVisibilityRange());
 	}
 }
 
@@ -79,13 +60,36 @@ bool URadarConeComponent::IsInsideConeAngle(const FVector& location) const
 		return true;
 	}
 
-	FRotator rotation = GetComponentRotation();
+	/*
+	FRotator rotation = GetOwner()->GetActorRotation();
 	FRotator angleToActor = direction.Rotation();
+	
 
 	// Incorrect, but fast
 	double yawDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Yaw, angleToActor.Yaw);
 	double pitchDeltaAngleDeg = FMath::FindDeltaAngleDegrees(rotation.Pitch, angleToActor.Pitch);
-	return FMath::Abs(yawDeltaAngleDeg) <= coneAngleDeg && FMath::Abs(pitchDeltaAngleDeg) < coneAngleDeg;
+	return FMath::Abs(yawDeltaAngleDeg) <= coneAngleDeg && FMath::Abs(pitchDeltaAngleDeg) <= coneAngleDeg;
+	*/
+	direction.Normalize();
+	FVector forward = GetForwardVector();
+	double dot = direction.Dot(forward);
+	double angle = FMath::Acos(dot);
+	double angleDeg = FMath::RadiansToDegrees(angle);
+	return FMath::Abs(angleDeg) <= coneAngleDeg;
+}
+
+bool URadarConeComponent::TryTrackAndNotify(AActor* actor) const
+{
+	if (!actor || actor->IsPendingKill())
+	{
+		return false;
+	}
+	if (!IsInsideConeAngle(actor->GetActorLocation()))
+	{
+		return false;
+	}
+
+	return Super::TryTrackAndNotify(actor);
 }
 
 void URadarConeComponent::SetTrackingRange(float radarRadius)

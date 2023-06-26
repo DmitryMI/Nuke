@@ -56,6 +56,11 @@ APlaytimePlayerController* APlaytimeGameState::GetPlayerControllerByTeam(const F
 
 APlaytimePlayerState* APlaytimeGameState::GetPlayerStateByTeam(const FGenericTeamId& teamId) const
 {
+	if (teamId == FGenericTeamId::NoTeam)
+	{
+		return nullptr;
+	}
+
 	check(PlayerArray.Num() > 0);
 	APlayerState* playerState = PlayerArray[teamId.GetId()];
 	return Cast<APlaytimePlayerState>(playerState);

@@ -157,9 +157,8 @@ void UFogOfWarComponent::WitnessIfHasLineOfSight(AActor* sightSourceActor, float
 	info.WitnessingTimestamp = GetWorld()->GetTimeSeconds();
 	info.WitnessingFrameNumber = GFrameCounter;
 
-
 #if WITH_EDITOR
-	DrawDebugLine(GetWorld(), lineStart, lineEnd, FColor::Cyan);
+	DrawDebugLine(GetWorld(), lineStart, lineEnd, FColor::Cyan, false, 0.25f);
 #endif
 }
 

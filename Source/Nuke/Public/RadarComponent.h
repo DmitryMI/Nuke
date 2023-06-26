@@ -23,7 +23,10 @@ private:
 	TArray<AActor*> trackedActors;
 
 	UPROPERTY(EditDefaultsOnly)
-	float trackingPeriod = 0.25f;
+	float trackingUpdatePeriod = 0.25f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float visibilityUpdatePeriod = 0.25f;
 
 	UPROPERTY(EditAnywhere)
 	float trackingRange = 10000.0f;
@@ -42,6 +45,9 @@ private:
 
 	UPROPERTY()
 	FTimerHandle updateTrackedActorsHandle;
+
+	UPROPERTY()
+	FTimerHandle updateVisibleActorsHandle;
 
 	UFUNCTION()
 	void UpdateTrackedActors();

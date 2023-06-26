@@ -42,9 +42,17 @@ void URadarComponent::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(
 		updateTrackedActorsHandle,
 		this, &URadarComponent::UpdateTrackedActors,
-		trackingPeriod,
+		trackingUpdatePeriod,
 		true,
-		trackingPeriod
+		trackingUpdatePeriod
+	);
+
+	GetWorld()->GetTimerManager().SetTimer(
+		updateVisibleActorsHandle,
+		this, &URadarComponent::UpdateVisibilityOfActorsInRange,
+		visibilityUpdatePeriod,
+		true,
+		visibilityUpdatePeriod
 	);
 }
 
@@ -221,6 +229,10 @@ bool URadarComponent::TryTrackAndNotify(AActor* actor) const
 		IGenericTeamAgentInterface* teamAgent = GetOwner<IGenericTeamAgentInterface>();
 		check(teamAgent);
 		fow->WitnessUnconditional(teamAgent->GetGenericTeamId());
+
+#if WITH_EDITOR
+		DrawDebugLine(GetWorld(), radarLocation, actorLocation, FColor::Magenta, false, 0.25f);
+#endif
 	}
 
 	if (bNotifyRadarDetectors)

@@ -17,7 +17,7 @@ void AFighter::BeginPlay()
 	ensure(fighterRadar);
 
 	fighterRadar->SetTrackingRange(radarTrackingRange);
-	fighterRadar->SetVisibilityRange(radarTrackingRange);
+	fighterRadar->SetVisibilityRange(radarVisibilityRange);
 	fighterRadar->SetConeAngleDeg(radarConeAngle);
 
 	int32 visibleMobilityFlags = 
