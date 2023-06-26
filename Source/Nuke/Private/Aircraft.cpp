@@ -82,6 +82,11 @@ void AAircraft::BeginPlay()
 		check(playerState);
 		playerState->GetPlayerUnitsMutable().Add(this);
 	}
+
+	for (AFlareDecoy* flare : flaresActive)
+	{
+		flare->OnFlareDecoyDestroyed().AddUObject(this, &AAircraft::OnFlareDecoyDestroyedHandler);
+	}
 }
 
 void AAircraft::DestroyDelayed()
@@ -110,6 +115,11 @@ void AAircraft::DestroyDelayed()
 		false, 
 		destroyDelay
 	);
+}
+
+void AAircraft::OnFlareDecoyDestroyedHandler(AFlareDecoy* sender)
+{
+	flaresActive.Remove(sender);
 }
 
 // Called every frame
@@ -283,6 +293,7 @@ AFlareDecoy* AAircraft::DeployFlareDecoy()
 	);
 
 	flaresActive.Add(flare);
+	flare->OnFlareDecoyDestroyed().AddUObject(this, &AAircraft::OnFlareDecoyDestroyedHandler);
 
 	return flare;
 }

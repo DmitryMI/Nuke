@@ -5,6 +5,7 @@
 
 void AFlareDecoy::OnFlareDurationExpired()
 {
+	onFlareDecoyDestroyed.Broadcast(this);
 	Destroy();
 }
 
@@ -79,4 +80,9 @@ void AFlareDecoy::SetVelocity(const FVector& velocity)
 		flareMovement = GetComponentByClass<UFlareMovementComponent>();
 	}
 	flareMovement->Velocity = velocity;
+}
+
+FFlareDecoyDestroyed& AFlareDecoy::OnFlareDecoyDestroyed()
+{
+	return onFlareDecoyDestroyed;
 }

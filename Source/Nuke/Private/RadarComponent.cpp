@@ -7,6 +7,8 @@
 #include "FogOfWarComponent.h"
 
 extern TAutoConsoleVariable<bool> CVarRadarDrawLos;
+extern TAutoConsoleVariable<bool> CVarRadarDrawShapes;
+extern TAutoConsoleVariable<int> CVarRadarDrawShapesSegments;
 
 void URadarComponent::UpdateTrackedActors()
 {
@@ -294,6 +296,14 @@ TArray<AActor*>& URadarComponent::GetActorsInRadarRange()
 	return actorsInRadarRange;
 }
 
+void URadarComponent::DrawDebugRadarShape()
+{
+	int segments = CVarRadarDrawShapesSegments.GetValueOnGameThread();
+	FVector center = GetOwner()->GetActorLocation() + GetRelativeLocation();
+	DrawDebugSphere(GetWorld(), center, visibilityRange, segments, FColor::Cyan);
+	DrawDebugSphere(GetWorld(), center, trackingRange, segments, FColor::Magenta);
+}
+
 
 // Called every frame
 void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -301,6 +311,11 @@ void URadarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	UpdateVisibilityOfActorsInRange();
+
+	if (CVarRadarDrawShapes.GetValueOnGameThread())
+	{
+		DrawDebugRadarShape();
+	}
 }
 
 TArray<AActor*> URadarComponent::GetTrackedThreatsArray() const
@@ -363,12 +378,12 @@ float URadarComponent::GetTrackingRange() const
 
 void URadarComponent::SetVisibilityRange(float range)
 {
-	trackingRange = range;
+	visibilityRange = range;
 }
 
 float URadarComponent::GetVisibilityRange() const
 {
-	return trackingRange;
+	return visibilityRange;
 }
 
 float URadarComponent::GetRadarCollisionRadius() const

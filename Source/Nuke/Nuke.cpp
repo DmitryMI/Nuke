@@ -22,3 +22,20 @@ TAutoConsoleVariable<bool> CVarRadarDrawLos(
     TEXT("\tfalse: drawing disabled\n"),
     ECVF_Cheat
 );
+
+TAutoConsoleVariable<bool> CVarRadarDrawShapes(
+    TEXT("radar.DrawShapes"),
+    false,
+    TEXT("Enables of disables rendering of debug shapes that represent radar irradiation areas.\n")
+    TEXT("\ttrue: drawing enabled\n")
+    TEXT("\tfalse: drawing disabled\n"),
+    ECVF_Cheat
+);
+
+
+TAutoConsoleVariable<int> CVarRadarDrawShapesSegments(
+    TEXT("radar.DrawShapesSegments"),
+    16,
+    TEXT("Number of segments in a sphere, used with radar.DrawShapes.\n"),
+    ECVF_Cheat
+);

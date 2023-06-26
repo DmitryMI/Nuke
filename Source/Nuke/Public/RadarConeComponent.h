@@ -36,6 +36,7 @@ protected:
 
 	virtual bool CanTrackActorInRadarRange(AActor* actor) const override;
 
+	virtual void DrawDebugRadarShape() override;
 public:
 	virtual void SetTrackingRange(float radarRadius) override;
 

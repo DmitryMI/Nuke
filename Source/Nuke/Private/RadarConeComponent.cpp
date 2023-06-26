@@ -4,6 +4,8 @@
 #include "RadarConeComponent.h"
 #include "Attackable.h"
 
+extern TAutoConsoleVariable<int> CVarRadarDrawShapesSegments;
+
 #if WITH_EDITOR  
 void URadarConeComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -64,7 +66,7 @@ bool URadarConeComponent::IsInsideConeAngle(const FVector& location) const
 
 bool URadarConeComponent::CanTrackActorInRadarRange(AActor* actor) const
 {
-	if (!actor || IsValid(actor))
+	if (!IsValid(actor))
 	{
 		return false;
 	}
@@ -74,6 +76,25 @@ bool URadarConeComponent::CanTrackActorInRadarRange(AActor* actor) const
 	}
 
 	return Super::CanTrackActorInRadarRange(actor);
+}
+
+void URadarConeComponent::DrawDebugRadarShape()
+{
+	int segments = CVarRadarDrawShapesSegments.GetValueOnGameThread();
+	FVector center = GetOwner()->GetActorLocation() + GetRelativeLocation();
+	DrawDebugSphere(GetWorld(), center, GetVisibilityRange(), segments, FColor::Cyan);
+
+	float coneAngleRad = FMath::DegreesToRadians(coneAngleDeg * 2);
+	DrawDebugCone(
+		GetWorld(),
+		center,
+		GetForwardVector(),
+		GetTrackingRange(),
+		coneAngleRad,
+		coneAngleRad,
+		segments, FColor::Magenta
+	);
+	//DrawDebugSphere(GetWorld(), center, trackingRange, segments, FColor::Magenta);
 }
 
 void URadarConeComponent::SetTrackingRange(float radarRadius)

@@ -33,7 +33,7 @@ void AAntiAirMissileController::FlyTowardsLocation(const FVector& location)
 void AAntiAirMissileController::FlyForward()
 {
 	APawn* pawn = GetPawn();
-	FVector location = pawn->GetActorForwardVector() * 100000.0f;
+	FVector location = pawn->GetActorLocation() + pawn->GetActorForwardVector() * 100000.0f;
 	FlyTowardsLocation(location);
 }
 

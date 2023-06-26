@@ -82,6 +82,8 @@ protected:
 
 	TArray<AActor*>& GetActorsInRadarRange();
 
+	virtual void DrawDebugRadarShape();
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

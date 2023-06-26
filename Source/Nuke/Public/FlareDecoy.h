@@ -8,6 +8,8 @@
 #include "FlareMovementComponent.h"
 #include "FlareDecoy.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FFlareDecoyDestroyed, AFlareDecoy*)
+
 UCLASS()
 class NUKE_API AFlareDecoy : public APawn
 {
@@ -23,9 +25,10 @@ private:
 	UPROPERTY()
 	FTimerHandle flareDurationHandle;
 
+	FFlareDecoyDestroyed onFlareDecoyDestroyed;
+
 	UFUNCTION()
 	void OnFlareDurationExpired();
-
 public:
 	// Sets default values for this pawn's properties
 	AFlareDecoy();
@@ -49,4 +52,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetVelocity(const FVector& velocity);
+
+	FFlareDecoyDestroyed& OnFlareDecoyDestroyed();
 };

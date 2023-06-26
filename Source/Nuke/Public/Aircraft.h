@@ -99,6 +99,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void DestroyDelayed();
 
+	UFUNCTION()
+	virtual void OnFlareDecoyDestroyedHandler(AFlareDecoy* sender);
 
 #if WITH_EDITOR  
 	void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent);
