@@ -92,11 +92,14 @@ void AAirDefence::BeginPlay()
 		fogOfWarComponent = GetComponentByClass<UFogOfWarComponent>();
 	}
 
-	APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();
-	check(gameState);
-	APlaytimePlayerState* playerState = gameState->GetPlayerStateByTeam(teamId);
-	check(playerState);
-	playerState->GetPlayerUnitsMutable().Add(this);
+	if (teamId != FGenericTeamId::NoTeam)
+	{
+		APlaytimeGameState* gameState = GetWorld()->GetGameState<APlaytimeGameState>();
+		check(gameState);
+		APlaytimePlayerState* playerState = gameState->GetPlayerStateByTeam(teamId);
+		check(playerState);
+		playerState->GetPlayerUnitsMutable().Add(this);
+	}
 }
 
 AActor* AAirDefence::Shoot(AActor* target)
