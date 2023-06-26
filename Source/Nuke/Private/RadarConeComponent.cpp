@@ -78,9 +78,9 @@ bool URadarConeComponent::IsInsideConeAngle(const FVector& location) const
 	return FMath::Abs(angleDeg) <= coneAngleDeg;
 }
 
-bool URadarConeComponent::TryTrackAndNotify(AActor* actor) const
+bool URadarConeComponent::CanTrackActorInRadarRange(AActor* actor) const
 {
-	if (!actor || actor->IsPendingKill())
+	if (!actor || IsValid(actor))
 	{
 		return false;
 	}
@@ -89,7 +89,7 @@ bool URadarConeComponent::TryTrackAndNotify(AActor* actor) const
 		return false;
 	}
 
-	return Super::TryTrackAndNotify(actor);
+	return Super::CanTrackActorInRadarRange(actor);
 }
 
 void URadarConeComponent::SetTrackingRange(float radarRadius)

@@ -72,7 +72,7 @@ protected:
 	UFUNCTION()
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	virtual bool TryTrackAndNotify(AActor* actor) const;
+	virtual bool CanTrackActorInRadarRange(AActor* actor) const;
 
 	virtual bool IsRadarDetectorNotificationEnabled() const;
 

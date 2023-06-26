@@ -10,13 +10,39 @@ void URadarComponent::UpdateTrackedActors()
 {
 	for (AActor* actor : actorsInRadarRange)
 	{
-		if (TryTrackAndNotify(actor))
+		if (CanTrackActorInRadarRange(actor))
 		{
 			trackedActors.AddUnique(actor);
+
+			IAttackable* actorAttackable = Cast<IAttackable>(actor);
+			UFogOfWarComponent* fow = actorAttackable->GetFogOfWarComponent();
+			if (fow)
+			{
+				IGenericTeamAgentInterface* teamAgent = GetOwner<IGenericTeamAgentInterface>();
+				check(teamAgent);
+				fow->WitnessUnconditional(teamAgent->GetGenericTeamId());
+
+#if WITH_EDITOR
+				DrawDebugLine(GetWorld(), GetOwner()->GetActorLocation(), actor->GetActorLocation(), FColor::Magenta, false, 0.25f);
+#endif
+			}
+
+			if (bNotifyRadarDetectors)
+			{
+				URadarDetectorComponent* radarDetector = actor->GetComponentByClass<URadarDetectorComponent>();
+				if (radarDetector)
+				{
+					radarDetector->NotifyDetection(GetOwner());
+				}
+			}
 		}
 		else
 		{
-			trackedActors.Remove(actor);
+			int index = trackedActors.IndexOfByKey(actor);
+			if (index != INDEX_NONE)
+			{
+				trackedActors.RemoveAt(index);
+			}
 		}
 	}
 }
@@ -178,7 +204,7 @@ void URadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 	}
 }
 
-bool URadarComponent::TryTrackAndNotify(AActor* actor) const
+bool URadarComponent::CanTrackActorInRadarRange(AActor* actor) const
 {
 	IAttackable* attackable = Cast<IAttackable>(actor);
 	if (!attackable)
@@ -223,26 +249,7 @@ bool URadarComponent::TryTrackAndNotify(AActor* actor) const
 		return false;
 	}
 
-	UFogOfWarComponent* fow = actor->GetComponentByClass<UFogOfWarComponent>();
-	if (fow)
-	{
-		IGenericTeamAgentInterface* teamAgent = GetOwner<IGenericTeamAgentInterface>();
-		check(teamAgent);
-		fow->WitnessUnconditional(teamAgent->GetGenericTeamId());
-
-#if WITH_EDITOR
-		DrawDebugLine(GetWorld(), radarLocation, actorLocation, FColor::Magenta, false, 0.25f);
-#endif
-	}
-
-	if (bNotifyRadarDetectors)
-	{
-		URadarDetectorComponent* radarDetector = actor->GetComponentByClass<URadarDetectorComponent>();
-		if (radarDetector)
-		{
-			radarDetector->NotifyDetection(GetOwner());
-		}
-	}
+	
 	return true;
 }
 

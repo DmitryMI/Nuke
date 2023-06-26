@@ -34,7 +34,7 @@ protected:
 
 	bool IsInsideConeAngle(const FVector& location) const;
 
-	virtual bool TryTrackAndNotify(AActor* actor) const override;
+	virtual bool CanTrackActorInRadarRange(AActor* actor) const override;
 
 public:
 	virtual void SetTrackingRange(float radarRadius) override;
