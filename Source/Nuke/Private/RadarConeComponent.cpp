@@ -32,23 +32,7 @@ void URadarConeComponent::BeginPlay()
 
 void URadarConeComponent::UpdateVisibilityOfActorsInRange()
 {
-	for (AActor* actorInRange : GetActorsInRadarRange())
-	{
-		IAttackable* attackable = Cast<IAttackable>(actorInRange);
-
-		if (((int)attackable->GetMobilityEnvironmentType() & GetVisibleMobilityFlags()) == 0)
-		{
-			continue;
-		}
-
-		UFogOfWarComponent* fow = attackable->GetFogOfWarComponent();
-		if (!fow)
-		{
-			continue;
-		}
-
-		fow->WitnessIfHasLineOfSight(GetOwner(), GetVisibilityRange());
-	}
+	Super::UpdateVisibilityOfActorsInRange();
 }
 
 bool URadarConeComponent::IsInsideConeAngle(const FVector& location) const

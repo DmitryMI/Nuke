@@ -31,7 +31,7 @@ class NUKE_API UFogOfWarComponent : public UActorComponent
 private:
 
 	UPROPERTY(EditAnywhere)
-	float visibilityUpdatePeriod = 0.5f;
+	float visibilityInfosUpdatePeriod = 0.5f;
 
 	UPROPERTY(EditAnywhere)
 	float visibilityLingerTime = 2.0f;
@@ -70,5 +70,5 @@ public:
 	void WitnessUnconditional(const FGenericTeamId& team);
 
 	UFUNCTION(BlueprintCallable)
-	void WitnessIfHasLineOfSight(AActor* sightSourceActor, float maxDistance);
+	void WitnessIfHasLineOfSight(AActor* sightSourceActor, float maxDistance, float timeTolerance);
 };

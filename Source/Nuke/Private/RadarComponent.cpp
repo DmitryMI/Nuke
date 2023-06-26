@@ -6,6 +6,8 @@
 #include "RadarDetectorComponent.h"
 #include "FogOfWarComponent.h"
 
+extern TAutoConsoleVariable<bool> CVarRadarDrawLos;
+
 void URadarComponent::UpdateTrackedActors()
 {
 	for (AActor* actor : actorsInRadarRange)
@@ -22,8 +24,11 @@ void URadarComponent::UpdateTrackedActors()
 				check(teamAgent);
 				fow->WitnessUnconditional(teamAgent->GetGenericTeamId());
 
-#if WITH_EDITOR
-				DrawDebugLine(GetWorld(), GetOwner()->GetActorLocation(), actor->GetActorLocation(), FColor::Magenta, false, 0.25f);
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+				if (CVarRadarDrawLos.GetValueOnGameThread())
+				{
+					DrawDebugLine(GetWorld(), GetOwner()->GetActorLocation(), actor->GetActorLocation(), FColor::Magenta, false, 0.25f);
+				}
 #endif
 			}
 
@@ -280,7 +285,7 @@ void URadarComponent::UpdateVisibilityOfActorsInRange()
 			continue;
 		}
 
-		fow->WitnessIfHasLineOfSight(GetOwner(), visibilityRange);
+		fow->WitnessIfHasLineOfSight(GetOwner(), visibilityRange, visibilityUpdatePeriod);
 	}
 }
 
@@ -313,7 +318,7 @@ bool URadarComponent::GetTrackedThreats(TArray<AActor*>& outThreats) const
 		{
 			continue;
 		}
-		if (actor->IsPendingKill())
+		if (IsValid(actor))
 		{
 			continue;
 		}

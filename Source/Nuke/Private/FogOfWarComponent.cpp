@@ -5,6 +5,7 @@
 #include "DrawDebugHelpers.h"
 
 extern TAutoConsoleVariable<bool> CVarShowInvisibleUnits;
+extern TAutoConsoleVariable<bool> CVarRadarDrawLos;
 
 void UFogOfWarComponent::UpdateVisibilityInfos()
 {
@@ -65,7 +66,7 @@ void UFogOfWarComponent::BeginPlay()
 		visibilityUpdateHandle,
 		this,
 		&UFogOfWarComponent::UpdateVisibilityInfos,
-		visibilityUpdatePeriod,
+		visibilityInfosUpdatePeriod,
 		true,
 		0
 	);
@@ -118,7 +119,7 @@ void UFogOfWarComponent::WitnessUnconditional(const FGenericTeamId& team)
 	info.WitnessingFrameNumber = GFrameCounter;
 }
 
-void UFogOfWarComponent::WitnessIfHasLineOfSight(AActor* sightSourceActor, float maxDistance)
+void UFogOfWarComponent::WitnessIfHasLineOfSight(AActor* sightSourceActor, float maxDistance, float timeTolerance)
 {
 	IGenericTeamAgentInterface* teamAgent = Cast<IGenericTeamAgentInterface>(sightSourceActor);
 	if (!teamAgent)
@@ -130,6 +131,11 @@ void UFogOfWarComponent::WitnessIfHasLineOfSight(AActor* sightSourceActor, float
 
 	FFogOfWarInfo& info = visibilityArray[team];
 	if (info.WitnessingFrameNumber == GFrameCounter)
+	{
+		return;
+	}
+
+	if (GetWorld()->GetTimeSeconds() - info.WitnessingTimestamp < timeTolerance)
 	{
 		return;
 	}
@@ -157,8 +163,11 @@ void UFogOfWarComponent::WitnessIfHasLineOfSight(AActor* sightSourceActor, float
 	info.WitnessingTimestamp = GetWorld()->GetTimeSeconds();
 	info.WitnessingFrameNumber = GFrameCounter;
 
-#if WITH_EDITOR
-	DrawDebugLine(GetWorld(), lineStart, lineEnd, FColor::Cyan, false, 0.25f);
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+	if (CVarRadarDrawLos.GetValueOnGameThread())
+	{
+		DrawDebugLine(GetWorld(), lineStart, lineEnd, FColor::Cyan, false, 0.25f);
+	}
 #endif
 }
 
