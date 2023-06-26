@@ -4,6 +4,8 @@
 #include "FogOfWarComponent.h"
 #include "DrawDebugHelpers.h"
 
+extern TAutoConsoleVariable<bool> CVarShowInvisibleUnits;
+
 void UFogOfWarComponent::UpdateVisibilityInfos()
 {
 	double time = GetWorld()->GetTimeSeconds();
@@ -81,11 +83,18 @@ void UFogOfWarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FGenericTeamId localPlayerTeam = localPlayerState->GetGenericTeamId();
-	if (localPlayerTeam != FGenericTeamId::NoTeam)
+	if (CVarShowInvisibleUnits.GetValueOnGameThread())
 	{
-		bool visibleForLocalPlayer = IsVisibleForTeam(localPlayerTeam);
-		GetOwner()->SetActorHiddenInGame(!visibleForLocalPlayer);
+		GetOwner()->SetActorHiddenInGame(false);
+	}
+	else
+	{
+		FGenericTeamId localPlayerTeam = localPlayerState->GetGenericTeamId();
+		if (localPlayerTeam != FGenericTeamId::NoTeam)
+		{
+			bool visibleForLocalPlayer = IsVisibleForTeam(localPlayerTeam);
+			GetOwner()->SetActorHiddenInGame(!visibleForLocalPlayer);
+		}
 	}
 }
 

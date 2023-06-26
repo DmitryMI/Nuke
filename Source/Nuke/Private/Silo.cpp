@@ -45,10 +45,12 @@ AActor* ASilo::Shoot(const FVector& targetLocation)
 		return nullptr;
 	}
 
+	FVector spawnLocation = GetActorLocation() + FVector::UpVector * 200.0f;
+
 	FActorSpawnParameters spawnParams;
 	spawnParams.Instigator = this;
 	spawnParams.Owner = this;
-	APawn* projectile = GetWorld()->SpawnActor<APawn>(ammoType, GetActorLocation(), FRotator(90, 0, 0), spawnParams);
+	APawn* projectile = GetWorld()->SpawnActor<APawn>(ammoType, spawnLocation, FRotator(90, 0, 0), spawnParams);
 	if (!projectile)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn ICBM!"));
@@ -60,7 +62,7 @@ AActor* ASilo::Shoot(const FVector& targetLocation)
 	FVector2D scatterAngle = FMath::RandPointInCircle(errorRadius);
 	FVector targetLocationWithError = targetLocation + FVector(scatterAngle.X, scatterAngle.Y, 0);
 
-	missile->SetTargetAndLaunchLocation(targetLocationWithError, GetActorLocation());
+	missile->SetTargetAndLaunchLocation(targetLocationWithError, spawnLocation);
 
 	bIsWeaponReady = false;
 	GetWorld()->GetTimerManager().SetTimer(

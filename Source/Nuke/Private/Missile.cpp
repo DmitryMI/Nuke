@@ -185,3 +185,8 @@ float AMissile::GetProximityFuseTriggerRange() const
 {
 	return proximityFuseTriggerRange;
 }
+
+EMobilityEnvironmentType AMissile::GetMobilityEnvironmentType() const
+{
+	return EMobilityEnvironmentType::MET_Air;
+}

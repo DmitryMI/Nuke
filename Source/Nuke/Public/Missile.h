@@ -115,4 +115,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetProximityFuseTriggerRange() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual EMobilityEnvironmentType GetMobilityEnvironmentType() const override;
 };
