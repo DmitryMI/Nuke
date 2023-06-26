@@ -125,6 +125,12 @@ int UAIUtils::QuadraticEquation(double a, double b, double c, double& x1, double
 
 bool UAIUtils::CalculateInterceptionBallistic(UBallisticMovementComponent* targetMovement, const FVector& launchLocation, double projectileInitialSpeed, double projectileAcceleration, double projectileMaxSpeed, FVector& outInterceptionLocation, double& outInterceptionTime, double& launchDelay)
 {
+	if (!targetMovement)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Ballistic Movement was nullptr!"));
+		return nullptr;
+	}
+
 	FVector targetDestination = targetMovement->GetTargetLocation();
 	double estimatedTimeToTarget = (launchLocation - targetMovement->GetOwner()->GetActorLocation()).Size() / projectileMaxSpeed;
 

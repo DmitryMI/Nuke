@@ -6,6 +6,21 @@
 #include "RadarDetectorComponent.h"
 #include "FogOfWarComponent.h"
 
+void URadarComponent::UpdateTrackedActors()
+{
+	for (AActor* actor : actorsInRadarRange)
+	{
+		if (TryTrackAndNotify(actor))
+		{
+			trackedActors.AddUnique(actor);
+		}
+		else
+		{
+			trackedActors.Remove(actor);
+		}
+	}
+}
+
 // Sets default values for this component's properties
 URadarComponent::URadarComponent()
 {
@@ -23,13 +38,20 @@ void URadarComponent::BeginPlay()
 	BindPrimitiveComponentColliders();
 
 	Super::BeginPlay();
+
+	GetWorld()->GetTimerManager().SetTimer(
+		updateTrackedActorsHandle,
+		this, &URadarComponent::UpdateTrackedActors,
+		trackingPeriod,
+		true,
+		trackingPeriod
+	);
 }
 
 void URadarComponent::BindPrimitiveComponentColliders()
 {
 	TArray<USceneComponent*> sceneComponents;
 	GetChildrenComponents(false, sceneComponents);
-
 	for (USceneComponent* child : sceneComponents)
 	{
 		if (UPrimitiveComponent* primitive = Cast<UPrimitiveComponent>(child))
@@ -87,8 +109,8 @@ void URadarComponent::OnActorEnteredRadarRange(UPrimitiveComponent* OverlappedCo
 	if (attackable->IsAlive())
 	{
 		UE_LOG(LogTemp, Display, TEXT("%s: %s is now in radar range"), *GetOwner()->GetName(), *OtherActor->GetName());
-		check(!threatsInRadarRange.Contains(OtherActor));
-		threatsInRadarRange.Add(OtherActor);
+		check(!actorsInRadarRange.Contains(OtherActor));
+		actorsInRadarRange.Add(OtherActor);
 	}
 }
 
@@ -132,12 +154,19 @@ void URadarComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 		return;
 	}
 
-	int index = threatsInRadarRange.IndexOfByKey(OtherActor);
+	int index = actorsInRadarRange.IndexOfByKey(OtherActor);
 
 	if (index != INDEX_NONE)
 	{
 		UE_LOG(LogTemp, Display, TEXT("%s: %s left radar range"), *GetOwner()->GetName(), *OtherActor->GetName());
-		threatsInRadarRange.RemoveAt(index);
+		actorsInRadarRange.RemoveAt(index);
+	}
+
+	int trackIndex = trackedActors.IndexOfByKey(OtherActor);
+	if (trackIndex != INDEX_NONE)
+	{
+		UE_LOG(LogTemp, Display, TEXT("%s: lost track of %s"), *GetOwner()->GetName(), *OtherActor->GetName());
+		trackedActors.RemoveAt(trackIndex);
 	}
 }
 
@@ -217,7 +246,7 @@ void URadarComponent::SetRadarDetectorNotificationEnabled(bool enabled)
 
 void URadarComponent::UpdateVisibilityOfActorsInRange()
 {
-	for (AActor* actorInRange : threatsInRadarRange)
+	for (AActor* actorInRange : actorsInRadarRange)
 	{
 		IAttackable* attackable = Cast<IAttackable>(actorInRange);
 
@@ -238,7 +267,7 @@ void URadarComponent::UpdateVisibilityOfActorsInRange()
 
 TArray<AActor*>& URadarComponent::GetActorsInRadarRange()
 {
-	return threatsInRadarRange;
+	return actorsInRadarRange;
 }
 
 
@@ -259,13 +288,21 @@ TArray<AActor*> URadarComponent::GetTrackedThreatsArray() const
 
 bool URadarComponent::GetTrackedThreats(TArray<AActor*>& outThreats) const
 {
-	for (AActor* actor : threatsInRadarRange)
+	for (AActor* actor : trackedActors)
 	{
-		if (!TryTrackAndNotify(actor))
+		if (!actor)
 		{
 			continue;
 		}
-
+		if (actor->IsPendingKill())
+		{
+			continue;
+		}
+		IAttackable* attackable = Cast<IAttackable>(actor);
+		if (!attackable->IsAlive())
+		{
+			continue;
+		}
 		outThreats.Add(actor);
 	}
 	return outThreats.Num() > 0;
@@ -287,12 +324,7 @@ FGenericTeamId URadarComponent::GetGenericTeamId() const
 
 bool URadarComponent::IsActorTrackedByRadar(AActor* actor) const
 {
-	if (!threatsInRadarRange.Contains(actor))
-	{
-		return false;
-	}
-
-	return TryTrackAndNotify(actor);
+	return trackedActors.Contains(actor);
 }
 
 void URadarComponent::SetTrackingRange(float range)

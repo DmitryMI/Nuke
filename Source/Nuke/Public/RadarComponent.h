@@ -17,7 +17,13 @@ class NUKE_API URadarComponent : public USceneComponent, public IGenericTeamAgen
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	TArray<AActor*> threatsInRadarRange;
+	TArray<AActor*> actorsInRadarRange;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<AActor*> trackedActors;
+
+	UPROPERTY(EditDefaultsOnly)
+	float trackingPeriod = 0.25f;
 
 	UPROPERTY(EditAnywhere)
 	float trackingRange = 10000.0f;
@@ -33,6 +39,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	bool bNotifyRadarDetectors = true;
+
+	UPROPERTY()
+	FTimerHandle updateTrackedActorsHandle;
+
+	UFUNCTION()
+	void UpdateTrackedActors();
 
 public:	
 	// Sets default values for this component's properties
