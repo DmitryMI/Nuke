@@ -318,7 +318,7 @@ bool URadarComponent::GetTrackedThreats(TArray<AActor*>& outThreats) const
 		{
 			continue;
 		}
-		if (IsValid(actor))
+		if (!IsValid(actor))
 		{
 			continue;
 		}
