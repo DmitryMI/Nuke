@@ -118,4 +118,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual EMobilityEnvironmentType GetMobilityEnvironmentType() const override;
+
+	virtual float GetStealthFactor() const override;
+
+	virtual UFogOfWarComponent* GetFogOfWarComponent() const;
 };

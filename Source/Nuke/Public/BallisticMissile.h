@@ -50,4 +50,6 @@ public:
 	UBallisticMovementComponent* GetBallisticMovement() const;
 
 	virtual void DestroyDelayed() override;
+
+	virtual float GetStealthFactor() const override;
 };

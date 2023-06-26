@@ -190,3 +190,13 @@ EMobilityEnvironmentType AMissile::GetMobilityEnvironmentType() const
 {
 	return EMobilityEnvironmentType::MET_Air;
 }
+
+float AMissile::GetStealthFactor() const
+{
+	return 1.0f;
+}
+
+UFogOfWarComponent* AMissile::GetFogOfWarComponent() const
+{
+	return fogOfWarComponent;
+}

@@ -92,4 +92,9 @@ void ABallisticMissile::DestroyDelayed()
 	ballisticMovement->FreezeMovement();
 }
 
+float ABallisticMissile::GetStealthFactor() const
+{
+	return 0.0f;
+}
+
 
