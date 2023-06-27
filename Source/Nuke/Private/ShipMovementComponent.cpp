@@ -16,21 +16,40 @@ void UShipMovementComponent::BeginPlay()
 	primitiveComponent->SetGenerateOverlapEvents(true);
 }
 
-bool UShipMovementComponent::FindWaterUnderShip(FVector& queryHit) const
+bool UShipMovementComponent::FindWaterUnderShip(float& waterSurfaceZ, float& waterDepth) const
 {
-	FVector traceStart = GetOwner()->GetActorLocation() + FVector::UpVector * 1000.0f;
-	FVector traceEnd = GetOwner()->GetActorLocation() + FVector::DownVector * 1000.0f;
-	//TArray<FHitResult> hitResults;
+	return TestLocation(GetOwner()->GetActorLocation(), waterSurfaceZ, waterDepth);
+}
+
+bool UShipMovementComponent::TestLocation(const FVector& location, float& waterSurfaceZ, float& waterDepth) const
+{
+	FVector traceStart = location + FVector::UpVector * 1000.0f;
+	FVector traceEnd = location + FVector::DownVector * 1000.0f;
 	FHitResult hitResult;
 	FCollisionQueryParams params;
 	bool hasHit = GetWorld()->LineTraceSingleByProfile(hitResult, traceStart, traceEnd, "WaterBodyCollision", params);
 	if (!hasHit || hitResult.GetComponent()->GetCollisionProfileName() != "WaterBodyCollision")
 	{
-		UE_LOG(LogTemp, Error, TEXT("Ship %s is not on water body!"), *GetOwner()->GetName());
 		return false;
 	}
+	waterSurfaceZ = hitResult.ImpactPoint.Z;
 
-	queryHit = hitResult.ImpactPoint;
+	FHitResult seabottomHitResult;
+	traceStart.Z = hitResult.ImpactPoint.Z;
+	traceEnd.Z = hitResult.ImpactPoint.Z - 10000.0f;
+	FCollisionQueryParams seabottomParams;
+	AActor* waterActor = hitResult.GetActor();
+	seabottomParams.AddIgnoredActor(waterActor);
+	bool seabedHasHit = GetWorld()->LineTraceSingleByProfile(seabottomHitResult, traceStart, traceEnd, "BlockAll", seabottomParams);
+	if (seabedHasHit)
+	{
+		waterDepth = waterSurfaceZ - seabottomHitResult.ImpactPoint.Z;
+	}
+	else
+	{
+		waterDepth = 10000.0f;
+	}
+	
 	return true;
 }
 
@@ -40,8 +59,9 @@ void UShipMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 	AActor* owner = GetOwner();
 
-	FVector waterSurface;
-	bool isOnWater = FindWaterUnderShip(waterSurface);
+	float waterSurfaceZ;
+	float waterDepth;
+	bool isOnWater = FindWaterUnderShip(waterSurfaceZ, waterDepth);
 	if (!isOnWater)
 	{
 		return;
@@ -52,11 +72,60 @@ void UShipMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 	float sinArg1 = GetWorld()->GetTimeSeconds() * bodyZSwingSpeed;
 	bodyZSwing = bodyZSwingMax * FMath::Sin(sinArg1);
-	
+
 	FVector location = owner->GetActorLocation();
-	location.Z = waterSurface.Z + bodyZOffset + bodyZSwing;
+	location.Z = waterSurfaceZ + bodyZOffset + bodyZSwing;
 
 	FRotator rotation = owner->GetActorRotation();
 	rotation.Roll = rollTilt;
+
+	FVector direction = targetLocation - owner->GetActorLocation();
+	if (direction.SizeSquared() < FMath::Square(targetLocationTolerance))
+	{
+		currentSpeed -= deceleration * DeltaTime;
+		if (currentSpeed < 0)
+		{
+			currentSpeed = 0;
+		}
+		Velocity = Velocity.GetSafeNormal(0.01) * currentSpeed * DeltaTime;
+	}
+	else
+	{
+		double distanceToTarget = direction.Size();
+		double timeToTarget = distanceToTarget / maxSpeed;
+		double targetYaw = direction.Rotation().Yaw;
+		double yawDelta = FMath::FindDeltaAngleDegrees(owner->GetActorRotation().Yaw, targetYaw);
+		double rotationTime = yawDelta / maxAngularSpeed;
+
+		double yawStep = FMath::Min(yawDelta, maxAngularSpeed * DeltaTime);
+		rotation.Yaw += yawStep;
+
+		if (rotationTime < timeToTarget)
+		{
+			currentSpeed += acceleration * DeltaTime;
+			if (currentSpeed > maxSpeed)
+			{
+				currentSpeed = maxSpeed;
+			}
+
+			Velocity = owner->GetActorForwardVector() * currentSpeed * DeltaTime;
+		}
+	}
+
+	FVector nextLocation = location + Velocity;
+
+	float nextWaterSurfaceZ;
+	float nextWaterDepth;
+	if (TestLocation(nextLocation, nextWaterSurfaceZ, nextWaterDepth) && nextWaterDepth >= minimalDepth)
+	{
+		location = nextLocation;
+	}
+	else
+	{
+		Velocity = FVector::ZeroVector;
+	}
+
+	UpdateComponentVelocity();
+
 	owner->SetActorLocationAndRotation(location, rotation);
 }
