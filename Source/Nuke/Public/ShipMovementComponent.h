@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/MovementComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "ShipMovementComponent.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class NUKE_API UShipMovementComponent : public UMovementComponent
+class NUKE_API UShipMovementComponent : public UPawnMovementComponent
 {
 	GENERATED_BODY()
 	

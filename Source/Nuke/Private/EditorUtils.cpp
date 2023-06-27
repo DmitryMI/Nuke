@@ -3,8 +3,8 @@
 
 #include "EditorUtils.h"
 #include "Kismet/GameplayStatics.h"
-#include "NavMesh/RecastNavMesh.h"
 #include "WaterBodyComponent.h"
+#include "NavMesh/RecastNavMesh.h"
 #include "NavigationSystem.h"
 
 void UEditorUtils::SetWaterNavArea(UObject* worldContext, TSubclassOf<UNavArea> navAreaClass)

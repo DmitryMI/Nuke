@@ -23,6 +23,8 @@ private:
 	TSubclassOf<ANukeBotController> BotControllerType;
 
 	TArray<ANukeBotController*> botControllers;
+
+	void FixMainNavData() const;
 	
 public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;

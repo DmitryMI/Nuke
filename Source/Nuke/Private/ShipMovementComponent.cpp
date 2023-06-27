@@ -2,6 +2,8 @@
 
 
 #include "ShipMovementComponent.h"
+#include "NavMesh/RecastNavMesh.h"
+#include "NavigationSystem.h"
 
 void UShipMovementComponent::BeginPlay()
 {
@@ -14,6 +16,12 @@ void UShipMovementComponent::BeginPlay()
 		primitiveComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Overlap);
 	}
 	primitiveComponent->SetGenerateOverlapEvents(true);
+
+	UNavigationSystemV1* navSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	auto supportedAgents = navSystem->GetSupportedAgents();
+	FNavDataConfig firstAgent = supportedAgents[0];
+	NavAgentProps = firstAgent;
+	//NavAgentProps.SetPreferredNavData(ARecastNavMesh::StaticClass());
 }
 
 bool UShipMovementComponent::FindWaterUnderShip(float& waterSurfaceZ, float& waterDepth) const
