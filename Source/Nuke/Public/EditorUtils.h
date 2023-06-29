@@ -26,4 +26,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Editor")
 	static UClass* GetClassByDisplayName(TArray<UClass*> clazzes, const FString& displayName);
+
+	UFUNCTION(BlueprintCallable, Category = "Editor", meta = (WorldContext = "WorldContextObject"))
+	static void SpawnShallowWaterNavModifiers(UObject* worldContext, TSubclassOf<AActor> modifierVolumeClass, TSubclassOf<UNavArea> shallowWaterNavAreaOverride = nullptr);
 };
