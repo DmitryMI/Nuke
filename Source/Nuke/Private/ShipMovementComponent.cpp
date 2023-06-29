@@ -5,6 +5,59 @@
 #include "NavMesh/RecastNavMesh.h"
 #include "NavigationSystem.h"
 
+void UShipMovementComponent::AnimateShipBuoyancy(float DeltaTime, float& zOffset, float& rollOffset)
+{
+	float sinArg0 = GetWorld()->GetTimeSeconds() * rollTiltSpeed;
+	rollOffset = rollTiltAngleMax * FMath::Sin(sinArg0);
+
+	float sinArg1 = GetWorld()->GetTimeSeconds() * bodyZSwingSpeed;
+	zOffset = bodyZSwingMax * FMath::Sin(sinArg1);
+}
+
+void UShipMovementComponent::GetVelocityAndRotationFromInput(float DeltaTime, FVector& nextVelocity, FRotator& nextRotation)
+{
+	FVector inputVector = ConsumeInputVector();
+	
+	float targetSpeed = inputVector.Size() * maxSpeed;
+	targetSpeed = FMath::Clamp(targetSpeed, 0, maxSpeed);
+
+	if(targetSpeed > currentSpeed)
+	{
+		currentSpeed += acceleration * DeltaTime;
+		if (currentSpeed > targetSpeed)
+		{
+			currentSpeed = targetSpeed;
+		}
+	}
+	else if(targetSpeed < currentSpeed)
+	{
+		currentSpeed -= deceleration * DeltaTime;
+		if (currentSpeed < targetSpeed)
+		{
+			currentSpeed = targetSpeed;
+		}
+	}
+
+	nextRotation = GetOwner()->GetActorRotation();
+
+	if (inputVector.IsNearlyZero())
+	{
+		nextVelocity = Velocity.GetSafeNormal(0.01) * currentSpeed * DeltaTime;
+	}
+	else
+	{
+		FRotator rotationToTarget = inputVector.Rotation();
+		double yawDelta = FMath::FindDeltaAngleDegrees(GetOwner()->GetActorRotation().Yaw, rotationToTarget.Yaw);
+		double yawStep = yawDelta;
+		if (FMath::Abs(yawDelta) > maxAngularSpeed * DeltaTime)
+		{
+			yawStep = FMath::Sign(yawDelta) * maxAngularSpeed * DeltaTime;
+		}
+		nextRotation.Yaw += yawStep;
+		nextVelocity = GetOwner()->GetActorForwardVector() * currentSpeed * DeltaTime;
+	}
+}
+
 void UShipMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -61,6 +114,16 @@ bool UShipMovementComponent::TestLocation(const FVector& location, float& waterS
 	return true;
 }
 
+UShipMovementComponent::UShipMovementComponent()
+{
+	bUseAccelerationForPaths = true;
+}
+
+void UShipMovementComponent::RequestPathMove(const FVector& MoveInput)
+{
+	Super::RequestPathMove(MoveInput);
+}
+
 void UShipMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -75,51 +138,19 @@ void UShipMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		return;
 	}
 
-	float sinArg0 = GetWorld()->GetTimeSeconds() * rollTiltSpeed;
-	rollTilt = rollTiltAngleMax * FMath::Sin(sinArg0);
-
-	float sinArg1 = GetWorld()->GetTimeSeconds() * bodyZSwingSpeed;
-	bodyZSwing = bodyZSwingMax * FMath::Sin(sinArg1);
+	float buoyancyZOffset;
+	float buoyancyRollOffset;
+	AnimateShipBuoyancy(DeltaTime, buoyancyZOffset, buoyancyRollOffset);
 
 	FVector location = owner->GetActorLocation();
-	location.Z = waterSurfaceZ + bodyZOffset + bodyZSwing;
+	location.Z = waterSurfaceZ + bodyZOffset + buoyancyZOffset;
 
-	FRotator rotation = owner->GetActorRotation();
-	rotation.Roll = rollTilt;
+	FVector nextVelocity;
+	FRotator nextRotation;
+	GetVelocityAndRotationFromInput(DeltaTime, nextVelocity, nextRotation);
+	nextRotation.Roll = buoyancyRollOffset;
 
-	FVector direction = targetLocation - owner->GetActorLocation();
-	if (direction.SizeSquared() < FMath::Square(targetLocationTolerance))
-	{
-		currentSpeed -= deceleration * DeltaTime;
-		if (currentSpeed < 0)
-		{
-			currentSpeed = 0;
-		}
-		Velocity = Velocity.GetSafeNormal(0.01) * currentSpeed * DeltaTime;
-	}
-	else
-	{
-		double distanceToTarget = direction.Size();
-		double timeToTarget = distanceToTarget / maxSpeed;
-		double targetYaw = direction.Rotation().Yaw;
-		double yawDelta = FMath::FindDeltaAngleDegrees(owner->GetActorRotation().Yaw, targetYaw);
-		double rotationTime = yawDelta / maxAngularSpeed;
-
-		double yawStep = FMath::Min(yawDelta, maxAngularSpeed * DeltaTime);
-		rotation.Yaw += yawStep;
-
-		if (rotationTime < timeToTarget)
-		{
-			currentSpeed += acceleration * DeltaTime;
-			if (currentSpeed > maxSpeed)
-			{
-				currentSpeed = maxSpeed;
-			}
-
-			Velocity = owner->GetActorForwardVector() * currentSpeed * DeltaTime;
-		}
-	}
-
+	Velocity = nextVelocity;
 	FVector nextLocation = location + Velocity;
 
 	float nextWaterSurfaceZ;
@@ -135,5 +166,5 @@ void UShipMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 	UpdateComponentVelocity();
 
-	owner->SetActorLocationAndRotation(location, rotation);
+	owner->SetActorLocationAndRotation(location, nextRotation);
 }

@@ -36,17 +36,11 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float rollTiltSpeed = 1;
 
-	UPROPERTY(VisibleAnywhere)
-	float rollTilt = 0.0f;
-
 	UPROPERTY(EditAnywhere)
 	float bodyZOffset = -30;
 
 	UPROPERTY(EditAnywhere)
 	float bodyZSwingMax = 10.0f;
-
-	UPROPERTY(VisibleAnywhere)
-	float bodyZSwing = 0;
 
 	UPROPERTY(EditAnywhere)
 	float bodyZSwingSpeed = 0.5;
@@ -60,14 +54,21 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float minimalDepth = 1000.0f;
 
-	UPROPERTY(VisibleAnywhere)
-	FVector targetLocation;
 
 protected:
+	virtual void AnimateShipBuoyancy(float DeltaTime, float& zOffset, float& rollOffset);
+
+	virtual void GetVelocityAndRotationFromInput(float DeltaTime, FVector& nextVelocity, FRotator& nextRotation);
+
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	bool FindWaterUnderShip(float& waterSurfaceZ, float& waterDepth) const;
 
 	bool TestLocation(const FVector& location, float& waterSurfaceZ, float& waterDepth) const;
+
+public:
+	UShipMovementComponent();
+
+	virtual void RequestPathMove(const FVector& MoveInput) override;
 };
