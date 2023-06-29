@@ -27,6 +27,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Editor")
 	static UClass* GetClassByDisplayName(TArray<UClass*> clazzes, const FString& displayName);
 
+	UFUNCTION(BlueprintCallable, Category = "Editor")
+	static void SpawnNavModifiersAroundSpline(UObject* worldContext,
+		TSubclassOf<AActor> modifierVolumeClass,
+		USplineComponent* splineComponent, 
+		int subsegmentsNum,
+		float width,
+		TArray<AActor*> modifierPool, 
+		int& modifierPoolIndex, 
+		TSubclassOf<UNavArea> navAreaOverride = nullptr
+	);
+
 	UFUNCTION(BlueprintCallable, Category = "Editor", meta = (WorldContext = "WorldContextObject"))
 	static void SpawnShallowWaterNavModifiers(UObject* worldContext, TSubclassOf<AActor> modifierVolumeClass, TSubclassOf<UNavArea> shallowWaterNavAreaOverride = nullptr);
 };
