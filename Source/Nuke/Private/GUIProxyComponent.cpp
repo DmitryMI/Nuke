@@ -11,7 +11,7 @@ UGUIProxyComponent::UGUIProxyComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	SetWidgetSpace(EWidgetSpace::Screen);
-	SetDrawSize(FVector2D(100, 50));
+	SetDrawSize(FVector2D(100, 25));
 }
 
 
@@ -31,6 +31,13 @@ void UGUIProxyComponent::ShowWidget()
 	{
 		return;
 	}
+
+	if (bIsVisible)
+	{
+		return;
+	}
+
+	bIsVisible = true;
 
 	FLinearColor widgetColor = colorNeutralForces;
 
@@ -76,6 +83,13 @@ void UGUIProxyComponent::HideWidget()
 		return;
 	}
 
+	if (!bIsVisible)
+	{
+		return;
+	}
+
+	bIsVisible = false;
+
 	widget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
@@ -100,7 +114,9 @@ void UGUIProxyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	{
 		ShowWidget();
 	}
-
-	
 }
 
+FVector2D UGUIProxyComponent::ModifyProjectedLocalPosition(const FGeometry& ViewportGeometry, const FVector2D& LocalPosition)
+{
+	return LocalPosition;
+}

@@ -16,8 +16,6 @@ class NUKE_API UGUIProxyComponent : public UWidgetComponent
 	GENERATED_BODY()
 
 private:
-	//"00308F" - USAF Blue
-	//"#CE0000" - Soviet Red
 
 	UPROPERTY(EditDefaultsOnly)
 	FLinearColor colorOwnForces = FLinearColor(0, 0.188235294118, 0x8F / 0.560784313725);
@@ -35,6 +33,7 @@ private:
 
 	APlayerController* localPlayerController;
 
+	bool bIsVisible = false;
 public:	
 	// Sets default values for this component's properties
 	UGUIProxyComponent();
@@ -50,5 +49,5 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	virtual FVector2D ModifyProjectedLocalPosition(const FGeometry& ViewportGeometry, const FVector2D& LocalPosition) override;
 };
