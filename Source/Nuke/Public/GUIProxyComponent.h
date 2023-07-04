@@ -7,6 +7,7 @@
 #include "GUIProxyWidget.h"
 #include "FogOfWarComponent.h"
 #include "Components/WidgetComponent.h"
+#include "PlaytimePlayerController.h"
 #include "GUIProxyComponent.generated.h"
 
 
@@ -33,7 +34,9 @@ private:
 
 	APlayerController* localPlayerController;
 
-	bool bIsVisible = false;
+	bool bIsWidgetVisible = false;
+
+	bool bIsUnitSelected = false;
 public:	
 	// Sets default values for this component's properties
 	UGUIProxyComponent();
@@ -41,6 +44,8 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	virtual void InitWidget() override;
 
 	void ShowWidget();
 	void HideWidget();
@@ -50,4 +55,13 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual FVector2D ModifyProjectedLocalPosition(const FGeometry& ViewportGeometry, const FVector2D& LocalPosition) override;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsUnitSelectedInGui() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetIsSelectedInGui(bool selectionState);
+
+	UFUNCTION(BlueprintCallable)
+	APlaytimePlayerController* GetLocalPlayerController() const;
 };

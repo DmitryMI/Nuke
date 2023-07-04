@@ -4,18 +4,11 @@
 #include "PlaytimePlayerController.h"
 #include "StrategicControlPawn.h"
 #include "City.h"
+#include "GUIProxyWidget.h"
+#include "GUIProxyComponent.h"
 #include "Attackable.h"
+#include "PlaytimeHUD.h"
 
-void APlaytimePlayerController::UpdateActorUnderCursor()
-{
-	FVector worldLocation;
-	FVector worldDirection;
-	bool deprojectOk = DeprojectMousePositionToWorld(worldLocation, worldDirection);
-	if (!deprojectOk)
-	{
-		actorUnderCursor = false;
-	}
-}
 
 void APlaytimePlayerController::BeginPlay()
 {
@@ -25,6 +18,81 @@ void APlaytimePlayerController::BeginPlay()
 void APlaytimePlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	APlaytimeHUD* hud = GetHUD<APlaytimeHUD>();
+	if (selectPressed && hud)
+	{
+		double x, y;
+		if (GetMousePosition(x, y))
+		{
+			hud->UpdateSelectionBox(FVector2D(x, y));
+		}
+	}
+}
+
+void APlaytimePlayerController::OnSelectPressed()
+{
+	double x, y;
+	selectPressed = GetMousePosition(x, y);
+	selectPressedMousePosition.X = x;
+	selectPressedMousePosition.Y = y;
+
+	if (APlaytimeHUD* hud = GetHUD<APlaytimeHUD>())
+	{
+		hud->StartDrawSelectionBox(selectPressedMousePosition);
+	}
+}
+
+void APlaytimePlayerController::OnSelectReleased()
+{
+	if (!selectPressed)
+	{
+		return;
+	}
+	selectPressed = false;
+
+	double x, y;
+	bool mouseOk = GetMousePosition(x, y);
+	if (!mouseOk)
+	{
+		return;
+	}
+
+	APlaytimeHUD* hud = GetHUD<APlaytimeHUD>();
+	if (hud)
+	{
+		hud->EndDrawSelectionBox();
+	}
+
+	FVector2D mousePos(x, y);
+	double mouseDeltaSquared = (mousePos - selectPressedMousePosition).SizeSquared();
+	double minDeltaSquared = multiselectionMouseDeltaMinimum * multiselectionMouseDeltaMinimum;
+	if (mouseDeltaSquared < minDeltaSquared)
+	{
+		// Select single actor under cursor
+	}
+	else
+	{
+		// Select multiple actors in selection box
+	}
+}
+
+void APlaytimePlayerController::OnMouseRightPressed()
+{
+}
+
+void APlaytimePlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	check(InputComponent);
+	InputComponent->BindAction("Select", EInputEvent::IE_Pressed, this, &APlaytimePlayerController::OnSelectPressed);
+	InputComponent->BindAction("Select", EInputEvent::IE_Released, this, &APlaytimePlayerController::OnSelectReleased);
+}
+
+APlaytimePlayerController::APlaytimePlayerController() : Super()
+{
+	bShowMouseCursor = true;
 }
 
 bool APlaytimePlayerController::FindPawnsAlongLine(const FVector& lineStart, const FVector& lineDirection, float lineWidth, TArray<AActor*>& outActors)
@@ -62,3 +130,4 @@ bool APlaytimePlayerController::FindPawnsAlongLine(const FVector& lineStart, con
 
 	return outActors.Num() > 0;
 }
+

@@ -32,12 +32,12 @@ void UGUIProxyComponent::ShowWidget()
 		return;
 	}
 
-	if (bIsVisible)
+	if (bIsWidgetVisible)
 	{
 		return;
 	}
 
-	bIsVisible = true;
+	bIsWidgetVisible = true;
 
 	FLinearColor widgetColor = colorNeutralForces;
 
@@ -71,7 +71,7 @@ void UGUIProxyComponent::ShowWidget()
 		}
 	}
 
-	widget->SetColorScheme(widgetColor);
+	widget->SetColorSchemeNative(widgetColor);
 	widget->SetVisibility(ESlateVisibility::Visible);
 }
 
@@ -83,12 +83,12 @@ void UGUIProxyComponent::HideWidget()
 		return;
 	}
 
-	if (!bIsVisible)
+	if (!bIsWidgetVisible)
 	{
 		return;
 	}
 
-	bIsVisible = false;
+	bIsWidgetVisible = false;
 
 	widget->SetVisibility(ESlateVisibility::Collapsed);
 }
@@ -116,7 +116,43 @@ void UGUIProxyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	}
 }
 
+void UGUIProxyComponent::InitWidget()
+{
+	Super::InitWidget();
+
+	UGUIProxyWidget* widget = Cast<UGUIProxyWidget>(GetWidget());
+	if (!widget)
+	{
+		return;
+	}
+
+	widget->SetOwningGuiProxy(this);
+}
+
+bool UGUIProxyComponent::IsUnitSelectedInGui() const
+{
+	return bIsUnitSelected;
+}
+
+void UGUIProxyComponent::SetIsSelectedInGui(bool selectionState)
+{
+	bIsUnitSelected = selectionState;
+
+	UGUIProxyWidget* widget = Cast<UGUIProxyWidget>(GetWidget());
+	if (!widget)
+	{
+		return;
+	}
+
+	widget->SetSelectionStateNative(selectionState);
+}
+
 FVector2D UGUIProxyComponent::ModifyProjectedLocalPosition(const FGeometry& ViewportGeometry, const FVector2D& LocalPosition)
 {
 	return LocalPosition;
+}
+
+APlaytimePlayerController* UGUIProxyComponent::GetLocalPlayerController() const
+{
+	return Cast<APlaytimePlayerController>(localPlayerController);
 }

@@ -22,10 +22,33 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FText UnitNameOverride;
 
+	UPROPERTY(EditAnywhere)
+	float foregroundOpacity = 0.5f;
+
+	UGUIProxyComponent* owningComponent;
+
+	UPROPERTY(BlueprintReadWrite)
+	FLinearColor baseColor;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsMouseInside = false;
+
 protected:
 	virtual bool Initialize() override;
 
+	UFUNCTION(BlueprintNativeEvent)
+	void OnColorSchemeSet(const FLinearColor& color);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnSelectionStateSet(bool selectionState);
+
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 public:
+
+	UFUNCTION(BlueprintCallable)
+	FLinearColor GetModifiedBaseColor() const;
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void SetIconImage(UObject* image);
@@ -33,6 +56,13 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void SetUnitName(const FText& unitName);
 
-	UFUNCTION(BlueprintNativeEvent)
-	void SetColorScheme(const FLinearColor& color);
+	void SetColorSchemeNative(const FLinearColor& color);
+	void SetSelectionStateNative(bool selectionState);
+
+	UFUNCTION(BlueprintCallable)
+	class UGUIProxyComponent* GetOwningGuiProxy() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetOwningGuiProxy(class UGUIProxyComponent* owner);
+
 };
