@@ -7,7 +7,10 @@
 #include "GenericTeamAgentInterface.h"
 #include "PlaytimePlayerState.h"
 #include "PlaytimePlayerController.h"
+#include "MatchProgressState.h"
 #include "PlaytimeGameState.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FMatchProgressStateChanged, APlaytimeGameState*, EMatchProgressState)
 
 /**
  * 
@@ -21,8 +24,16 @@ private:
 
 	static APlaytimeGameState* playtimeGameStateInstance;
 
+	UPROPERTY(VisibleAnywhere, Replicated, ReplicatedUsing = OnRep_MatchProgressState)
+	EMatchProgressState matchProgressState = EMatchProgressState::MPS_WaitingForStart;
+
+	FMatchProgressStateChanged onMatchProgressStateChanged;
+
 protected:
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	UFUNCTION()
+	void OnRep_MatchProgressState(EMatchProgressState stateNew);
 public:
 	virtual void BeginPlay() override;
 
@@ -38,4 +49,11 @@ public:
 
 	virtual void AddPlayerState(APlayerState* PlayerState) override;
 	virtual void RemovePlayerState(APlayerState* PlayerState) override;
+
+	UFUNCTION(BlueprintCallable)
+	EMatchProgressState GetMatchProgressState() const;
+
+	FMatchProgressStateChanged& OnMatchProgressStateChanged();
+
+	void SetMatchProgressState(EMatchProgressState state);
 };

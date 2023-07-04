@@ -7,9 +7,7 @@
 #include "NukeBotController.h"
 #include "PlaytimeGameMode.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class NUKE_API APlaytimeGameMode : public AGameMode
 {
@@ -23,7 +21,6 @@ private:
 	TSubclassOf<ANukeBotController> BotControllerType;
 
 	TArray<ANukeBotController*> botControllers;
-	
 public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 

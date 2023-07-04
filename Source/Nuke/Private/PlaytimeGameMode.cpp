@@ -3,6 +3,10 @@
 
 #include "PlaytimeGameMode.h"
 #include "PlaytimeGameState.h"
+#include "NavMesh/RecastNavMesh.h"
+#include "Kismet/GameplayStatics.h"
+#include "NavigationSystem.h"
+
 
 void APlaytimeGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {

@@ -2,6 +2,8 @@
 
 
 #include "City.h"
+#include "PlaytimeUtils.h"
+#include "PlaytimePlayerState.h"
 
 #if WITH_EDITOR  
 void ACity::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
@@ -35,7 +37,11 @@ void ACity::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	
+	APlaytimePlayerState* playerState = UPlaytimeUtils::GetOwningPlayerState(this);
+	if (playerState && GetLocalRole() == ROLE_Authority)
+	{
+		playerState->GetPlayerCitiesMutable().AddUnique(this);
+	}
 }
 
 // Called every frame

@@ -67,6 +67,9 @@ public:
 	bool IsVisibleForTeam(const FGenericTeamId& team);
 
 	UFUNCTION(BlueprintCallable)
+	bool IsVisibleForController(AController* controller);
+
+	UFUNCTION(BlueprintCallable)
 	void WitnessUnconditional(const FGenericTeamId& team);
 
 	UFUNCTION(BlueprintCallable)

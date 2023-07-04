@@ -111,6 +111,18 @@ bool UFogOfWarComponent::IsVisibleForTeam(const FGenericTeamId& team)
 	return info.bIsVisible;
 }
 
+bool UFogOfWarComponent::IsVisibleForController(AController* controller)
+{
+	APlaytimePlayerState* playerState = controller->GetPlayerState<APlaytimePlayerState>();
+	if (!playerState)
+	{
+		return false;
+	}
+
+	FGenericTeamId team = playerState->GetGenericTeamId();
+	return IsVisibleForTeam(team);
+}
+
 void UFogOfWarComponent::WitnessUnconditional(const FGenericTeamId& team)
 {
 	FFogOfWarInfo& info = visibilityArray[team];

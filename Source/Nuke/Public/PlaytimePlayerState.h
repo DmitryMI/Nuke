@@ -5,7 +5,28 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "GenericTeamAgentInterface.h"
+#include "City.h"
 #include "PlaytimePlayerState.generated.h"
+
+
+USTRUCT(BlueprintType)
+struct FUndeployedUnitCounters
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere)
+	int Airbases = 4;
+	UPROPERTY(EditAnywhere)
+	int Silos = 4;
+	UPROPERTY(EditAnywhere)
+	int AirDefences = 8;
+	UPROPERTY(EditAnywhere)
+	int Cruisers = 8;
+	UPROPERTY(EditAnywhere)
+	int AircraftCarriers = 2;
+	UPROPERTY(EditAnywhere)
+	int Submarines = 4;
+};
 
 /**
  * 
@@ -16,11 +37,17 @@ class NUKE_API APlaytimePlayerState : public APlayerState, public IGenericTeamAg
 	GENERATED_BODY()
 	
 private:
+	UPROPERTY(EditAnywhere, Replicated)
+	FUndeployedUnitCounters undeployedUnitCounters;
+
 	UPROPERTY(VisibleAnywhere, Replicated)
 	FGenericTeamId teamId;
 
 	UPROPERTY(VisibleAnywhere, Replicated)
 	TArray<AActor*> playerUnits;
+
+	UPROPERTY(VisibleAnywhere, Replicated)
+	TArray<ACity*> playerCities;
 
 protected:
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const;
@@ -30,7 +57,16 @@ public:
 	TArray<AActor*>& GetPlayerUnitsMutable();
 
 	UFUNCTION(BlueprintCallable)
-	const TArray<AActor*>& GetPlayerUnits();
+	const TArray<AActor*>& GetPlayerUnits() const;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<ACity*>& GetPlayerCitiesMutable();
+
+	UFUNCTION(BlueprintCallable)
+	const TArray<ACity*>& GetPlayerCities() const;
+
+	UFUNCTION(BlueprintCallable)
+	FUndeployedUnitCounters& GetUndeployedUnitCountersMutable();
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
