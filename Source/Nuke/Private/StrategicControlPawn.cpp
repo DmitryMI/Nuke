@@ -2,6 +2,7 @@
 
 
 #include "StrategicControlPawn.h"
+#include "UnitController.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -102,5 +103,28 @@ void AStrategicControlPawn::SetZoom(float zoom)
 	}
 
 	arm->TargetArmLength = cameraZoom;
+}
+
+FVector AStrategicControlPawn::GetSightLineWithHorizonIntersection() const
+{
+	FVector lineStart = GetActorLocation();
+	FVector lineEnd = GetActorForwardVector() * 10000000;
+	return FMath::LinePlaneIntersection(lineStart, lineEnd, FVector::ZeroVector, FVector::UpVector);
+}
+
+void AStrategicControlPawn::IssueMoveOrder_Implementation(AActor* unitActor, const FVector& location)
+{
+	if (!unitActor)
+	{
+		return;
+	}
+
+	APawn* pawn = Cast<APawn>(unitActor);
+
+	IUnitController* unitController = pawn->GetController<IUnitController>();
+	if (unitController)
+	{
+		unitController->IssueMoveOrder(location);
+	}
 }
 

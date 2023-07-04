@@ -2,6 +2,7 @@
 
 
 #include "Ship.h"
+#include "ShipController.h"
 
 // Sets default values
 AShip::AShip()
@@ -28,6 +29,16 @@ void AShip::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+FGenericTeamId AShip::GetGenericTeamId() const
+{
+	return teamId;
+}
+
+void AShip::SetGenericTeamId(const FGenericTeamId& team)
+{
+	teamId = team;
 }
 
 

@@ -10,7 +10,12 @@ void APlaytimeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// DOREPLIFETIME(APlaytimeGameState, playerStates);
+	DOREPLIFETIME(APlaytimeGameState, matchProgressState);
+}
+
+void APlaytimeGameState::OnRep_MatchProgressState(EMatchProgressState stateNew)
+{
+	onMatchProgressStateChanged.Broadcast(this, stateNew);
 }
 
 void APlaytimeGameState::BeginPlay()
@@ -61,7 +66,7 @@ APlaytimePlayerState* APlaytimeGameState::GetPlayerStateByTeam(const FGenericTea
 		return nullptr;
 	}
 
-	check(PlayerArray.Num() > 0);
+	check(PlayerArray.Num() > teamId.GetId());
 	APlayerState* playerState = PlayerArray[teamId.GetId()];
 	return Cast<APlaytimePlayerState>(playerState);
 }
@@ -79,4 +84,27 @@ void APlaytimeGameState::RemovePlayerState(APlayerState* PlayerState)
 	APlaytimePlayerState* playtimePlayerState = Cast<APlaytimePlayerState>(PlayerState);
 	playtimePlayerState->SetGenericTeamId(FGenericTeamId::NoTeam);
 	Super::RemovePlayerState(PlayerState);
+}
+
+EMatchProgressState APlaytimeGameState::GetMatchProgressState() const
+{
+	return matchProgressState;
+}
+
+FMatchProgressStateChanged& APlaytimeGameState::OnMatchProgressStateChanged()
+{
+	return onMatchProgressStateChanged;
+}
+
+void APlaytimeGameState::SetMatchProgressState(EMatchProgressState state)
+{
+	if (GEngine->GetNetMode(GetWorld()) == ENetMode::NM_Client)
+	{
+		return;
+	}
+
+	matchProgressState = state;
+
+	// OnRep not called on servers, doing it manually
+	OnRep_MatchProgressState(state);
 }

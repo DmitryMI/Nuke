@@ -17,9 +17,24 @@ TArray<AActor*>& APlaytimePlayerState::GetPlayerUnitsMutable()
 	return playerUnits;
 }
 
-const TArray<AActor*>& APlaytimePlayerState::GetPlayerUnits()
+const TArray<AActor*>& APlaytimePlayerState::GetPlayerUnits() const
 {
 	return playerUnits;
+}
+
+TArray<ACity*>& APlaytimePlayerState::GetPlayerCitiesMutable()
+{
+	return playerCities;
+}
+
+const TArray<ACity*>& APlaytimePlayerState::GetPlayerCities() const
+{
+	return playerCities;
+}
+
+FUndeployedUnitCounters& APlaytimePlayerState::GetUndeployedUnitCountersMutable()
+{
+	return undeployedUnitCounters;
 }
 
 FGenericTeamId APlaytimePlayerState::GetGenericTeamId() const

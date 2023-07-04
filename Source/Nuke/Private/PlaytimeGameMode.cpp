@@ -7,34 +7,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "NavigationSystem.h"
 
-void APlaytimeGameMode::FixMainNavData() const
-{
-	ARecastNavMesh* navMesh = Cast<ARecastNavMesh>(UGameplayStatics::GetActorOfClass(GetWorld(), ARecastNavMesh::StaticClass()));
-
-	UNavigationSystemV1* navSystem = UNavigationSystemV1::GetCurrent(GetWorld());
-	if (!navSystem->MainNavData)
-	{
-		if (navMesh)
-		{
-			navSystem->MainNavData = navMesh;
-			UE_LOG(LogTemp, Warning, TEXT("MainNavData was nullptr! Set to %s"), *navMesh->GetName());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("MainNavData is nullptr and ARecastNavMesh actor was not found!"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Display, TEXT("MainNavData is %s"), *navSystem->MainNavData->GetName());
-	}
-}
 
 void APlaytimeGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
-
-	FixMainNavData();
 
 	AddBot();
 }

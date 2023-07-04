@@ -48,4 +48,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void SetZoom(float zoom);
+
+	UFUNCTION(Server, Reliable)
+	void IssueMoveOrder(AActor* unitActor, const FVector& location);
+
+	FVector GetSightLineWithHorizonIntersection() const;
 };
