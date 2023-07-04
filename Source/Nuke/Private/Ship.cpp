@@ -3,6 +3,7 @@
 
 #include "Ship.h"
 #include "ShipController.h"
+#include "PlaytimeUtils.h"
 
 // Sets default values
 AShip::AShip()
@@ -21,6 +22,12 @@ void AShip::BeginPlay()
 	if (!shipMovement)
 	{
 		shipMovement = GetComponentByClass<UShipMovementComponent>();
+	}
+
+	APlaytimePlayerState* playerState = UPlaytimeUtils::GetOwningPlayerState(this);
+	if (playerState)
+	{
+		playerState->GetPlayerUnitsMutable().Add(this);
 	}
 }
 

@@ -2,6 +2,8 @@
 
 
 #include "GUIProxyComponent.h"
+#include "Components/PanelSlot.h"
+#include "Components/CanvasPanelSlot.h"
 
 // Sets default values for this component's properties
 UGUIProxyComponent::UGUIProxyComponent()
@@ -138,6 +140,15 @@ void UGUIProxyComponent::SetIsSelectedInGui(bool selectionState)
 {
 	bIsUnitSelected = selectionState;
 
+	if (bIsUnitSelected)
+	{
+		UE_LOG(LogTemp, Display, TEXT("%s added to selection"), *GetOwner()->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("%s removed from selection"), *GetOwner()->GetName());
+	}
+
 	UGUIProxyWidget* widget = Cast<UGUIProxyWidget>(GetWidget());
 	if (!widget)
 	{
@@ -149,10 +160,33 @@ void UGUIProxyComponent::SetIsSelectedInGui(bool selectionState)
 
 FVector2D UGUIProxyComponent::ModifyProjectedLocalPosition(const FGeometry& ViewportGeometry, const FVector2D& LocalPosition)
 {
+	lastScreenLocation = LocalPosition;
 	return LocalPosition;
 }
 
 APlaytimePlayerController* UGUIProxyComponent::GetLocalPlayerController() const
 {
 	return Cast<APlaytimePlayerController>(localPlayerController);
+}
+
+bool UGUIProxyComponent::GetWidgetScreenLocation(FVector2D& location) const
+{
+	UGUIProxyWidget* widget = Cast<UGUIProxyWidget>(GetWidget());
+	if (!widget || widget->GetVisibility() != ESlateVisibility::Visible)
+	{
+		return false;
+	}
+
+	location = lastScreenLocation;
+	return true;
+}
+
+bool UGUIProxyComponent::IsWidgetVisible() const
+{
+	UGUIProxyWidget* widget = Cast<UGUIProxyWidget>(GetWidget());
+	if (!widget || widget->GetVisibility() != ESlateVisibility::Visible)
+	{
+		return false;
+	}
+	return true;
 }

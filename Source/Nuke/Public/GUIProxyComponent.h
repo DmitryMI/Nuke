@@ -37,6 +37,8 @@ private:
 	bool bIsWidgetVisible = false;
 
 	bool bIsUnitSelected = false;
+
+	FVector2D lastScreenLocation;
 public:	
 	// Sets default values for this component's properties
 	UGUIProxyComponent();
@@ -64,4 +66,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	APlaytimePlayerController* GetLocalPlayerController() const;
+
+	bool GetWidgetScreenLocation(FVector2D& location) const;
+
+	bool IsWidgetVisible() const;
 };

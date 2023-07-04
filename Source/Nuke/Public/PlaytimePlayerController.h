@@ -39,11 +39,17 @@ protected:
 protected:
 	virtual void SetupInputComponent() override;
 
+
 public:
 	APlaytimePlayerController();
+
+	void AddToSelection(AActor* actor);
+
+	void ClearSelection();
 
 	UFUNCTION(BlueprintCallable)
 	bool FindPawnsAlongLine(const FVector& lineStart, const FVector& lineDirection, float lineWidth, TArray<AActor*>& outActors);
 
-
+	UFUNCTION(BlueprintCallable)
+	bool FindUnitsInsideScreenBox(const FVector2D& boxStart, const FVector2D& boxEnd, TArray<AActor*>& outActors) const;
 };
