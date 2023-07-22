@@ -77,12 +77,12 @@ void UShipMovementComponent::BeginPlay()
 	//NavAgentProps.SetPreferredNavData(ARecastNavMesh::StaticClass());
 }
 
-bool UShipMovementComponent::FindWaterUnderShip(float& waterSurfaceZ, float& waterDepth) const
+bool UShipMovementComponent::FindWaterUnderShip(float& waterZ, float& waterDepth) const
 {
-	return TestLocation(GetOwner()->GetActorLocation(), waterSurfaceZ, waterDepth);
+	return TestLocation(GetOwner()->GetActorLocation(), waterZ, waterDepth);
 }
 
-bool UShipMovementComponent::TestLocation(const FVector& location, float& waterSurfaceZ, float& waterDepth) const
+bool UShipMovementComponent::TestLocation(const FVector& location, float& waterZ, float& waterDepth) const
 {
 	FVector traceStart = location + FVector::UpVector * 1000.0f;
 	FVector traceEnd = location + FVector::DownVector * 1000.0f;
@@ -93,7 +93,7 @@ bool UShipMovementComponent::TestLocation(const FVector& location, float& waterS
 	{
 		return false;
 	}
-	waterSurfaceZ = hitResult.ImpactPoint.Z;
+	waterZ = hitResult.ImpactPoint.Z;
 
 	FHitResult seabottomHitResult;
 	traceStart.Z = hitResult.ImpactPoint.Z;
@@ -124,13 +124,19 @@ void UShipMovementComponent::RequestPathMove(const FVector& MoveInput)
 	Super::RequestPathMove(MoveInput);
 }
 
+FVector UShipMovementComponent::GetActorFeetLocation() const
+{
+	FVector location = GetActorLocation();
+	location.Z = waterSurfaceZ;
+	return location;
+}
+
 void UShipMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	AActor* owner = GetOwner();
 
-	float waterSurfaceZ;
 	float waterDepth;
 	bool isOnWater = FindWaterUnderShip(waterSurfaceZ, waterDepth);
 	if (!isOnWater)

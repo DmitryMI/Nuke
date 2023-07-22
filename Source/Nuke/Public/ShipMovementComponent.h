@@ -54,6 +54,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float minimalDepth = 1000.0f;
 
+	float waterSurfaceZ = 0.0f;
 
 protected:
 	virtual void AnimateShipBuoyancy(float DeltaTime, float& zOffset, float& rollOffset);
@@ -71,4 +72,6 @@ public:
 	UShipMovementComponent();
 
 	virtual void RequestPathMove(const FVector& MoveInput) override;
+
+	virtual FVector GetActorFeetLocation() const override;
 };
