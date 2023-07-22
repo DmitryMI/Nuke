@@ -7,6 +7,7 @@
 #include "GUIProxyWidget.h"
 #include "GUIProxyComponent.h"
 #include "Attackable.h"
+#include "NiagaraComponent.h"
 #include "PlaytimeHUD.h"
 
 
@@ -66,7 +67,7 @@ void APlaytimePlayerController::OnSelectReleased()
 
 	FVector2D mousePos(x, y);
 	double mouseDeltaSquared = (mousePos - selectPressedMousePosition).SizeSquared();
-	double minDeltaSquared = multiselectionMouseDeltaMinimum * multiselectionMouseDeltaMinimum;
+	double minDeltaSquared = mouseMovementThreshold * mouseMovementThreshold;
 	if (mouseDeltaSquared < minDeltaSquared)
 	{
 		// Select single actor under cursor
@@ -86,8 +87,67 @@ void APlaytimePlayerController::OnSelectReleased()
 	}
 }
 
-void APlaytimePlayerController::OnMouseRightPressed()
+void APlaytimePlayerController::OnCommandPressed(bool bQueue)
 {
+	double x, y;
+	commandPressed = GetMousePosition(x, y);
+	commandPressedMousePosition.X = x;
+	commandPressedMousePosition.Y = y;
+}
+
+void APlaytimePlayerController::OnCommandReleased(bool bQueue)
+{
+	if (!commandPressed)
+	{
+		return;
+	}
+	commandPressed = false;
+
+	double x, y;
+	bool mouseOk = GetMousePosition(x, y);
+	if (!mouseOk)
+	{
+		return;
+	}
+
+	FVector2D mousePos(x, y);
+	double mouseDeltaSquared = (mousePos - commandPressedMousePosition).SizeSquared();
+	double minDeltaSquared = mouseMovementThreshold * mouseMovementThreshold;
+	if (mouseDeltaSquared < minDeltaSquared)
+	{
+		FVector landscapeLocation;
+		bool deprojOk = DeprojectScreenPositionToLandscape(mousePos, landscapeLocation);
+		if (deprojOk)
+		{
+			SpawnMoveToEffect(mousePos, landscapeLocation, moveToEffectColor);
+
+			SubmitGenericPointOrders(selectedActors, landscapeLocation, bQueue);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to deproject screen location %s on Landscape"), *mousePos.ToString());
+		}
+	}
+}
+
+void APlaytimePlayerController::OnCommandPressedImmediate()
+{
+	OnCommandPressed(false);
+}
+
+void APlaytimePlayerController::OnCommandReleasedImmediate()
+{
+	OnCommandReleased(false);
+}
+
+void APlaytimePlayerController::OnCommandPressedQueue()
+{
+	OnCommandPressed(true);
+}
+
+void APlaytimePlayerController::OnCommandReleasedQueue()
+{
+	OnCommandReleased(true);
 }
 
 void APlaytimePlayerController::SetupInputComponent()
@@ -97,6 +157,89 @@ void APlaytimePlayerController::SetupInputComponent()
 	check(InputComponent);
 	InputComponent->BindAction("Select", EInputEvent::IE_Pressed, this, &APlaytimePlayerController::OnSelectPressed);
 	InputComponent->BindAction("Select", EInputEvent::IE_Released, this, &APlaytimePlayerController::OnSelectReleased);
+
+	InputComponent->BindAction("Command", EInputEvent::IE_Pressed, this, &APlaytimePlayerController::OnCommandPressedImmediate);
+	InputComponent->BindAction("Command", EInputEvent::IE_Released, this, &APlaytimePlayerController::OnCommandReleasedImmediate);
+
+	InputComponent->BindAction("CommandQueue", EInputEvent::IE_Pressed, this, &APlaytimePlayerController::OnCommandPressedQueue);
+	InputComponent->BindAction("CommandQueue", EInputEvent::IE_Released, this, &APlaytimePlayerController::OnCommandReleasedQueue);
+}
+
+void APlaytimePlayerController::SubmitGenericPointOrders(const TArray<AActor*> unitGroup, const FVector& targetLocation, bool bQueue)
+{
+	if (unitGroup.Num() == 0)
+	{
+		return;
+	}
+
+	AStrategicControlPawn* pawn = GetPawn<AStrategicControlPawn>();
+	if (!pawn)
+	{
+		return;
+	}
+
+	for (AActor* actor : unitGroup)
+	{
+		if (!pawn->CanCommandUnit(actor))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Local player (team: %d): cannot command unit %s"), GetGenericTeamId(), *targetLocation.ToString(), *actor->GetName());
+			continue;
+		}
+		UE_LOG(LogTemp, Display, TEXT("Local player (team: %d): submitting point order %s for %s (queue: %d)"), GetGenericTeamId(), *targetLocation.ToString(), *actor->GetName(), bQueue);
+		pawn->SubmitGenericPointOrder(actor, targetLocation, bQueue);
+	}
+}
+
+void APlaytimePlayerController::SpawnMoveToEffect(const FVector2D& screenLocation, const FVector& worldLocation, const FLinearColor& color)
+{
+	if (!moveToEffect)
+	{
+		return;
+	}
+
+	FVector centerPointWorld;
+	FVector centerPointWorldDir;
+	bool deprojOk = DeprojectScreenPositionToWorld(screenLocation.X, screenLocation.Y, centerPointWorld, centerPointWorldDir);
+	
+	FVector2D leftPoint = screenLocation - FVector2D(moveToEffectScreenSize / 2, 0);
+	FVector2D rightPoint = screenLocation + FVector2D(moveToEffectScreenSize / 2, 0);
+	FVector leftPointWorld;
+	FVector leftPointWorldDir;
+	FVector rightPointWorld;
+	FVector rightPointWorldDir;
+	deprojOk &= DeprojectScreenPositionToWorld(leftPoint.X, leftPoint.Y, leftPointWorld, leftPointWorldDir);
+	deprojOk &= DeprojectScreenPositionToWorld(rightPoint.X, rightPoint.Y, rightPointWorld, rightPointWorldDir);
+	if (!deprojOk)
+	{
+		return;
+	}
+
+	double distanceFromCamera = (worldLocation - centerPointWorld).Size();
+
+	leftPointWorld += leftPointWorldDir * distanceFromCamera;
+	rightPointWorld += rightPointWorldDir * distanceFromCamera;
+
+	double worldSize = (leftPointWorld - rightPointWorld).Size();
+	double worldScale = worldSize / 100.0f;
+
+	UNiagaraComponent* effect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		moveToEffect,
+		worldLocation,
+		FRotator::ZeroRotator,
+		FVector(worldScale, worldScale, worldScale),
+		true,
+		true,
+		ENCPoolMethod::AutoRelease,
+		false
+	);
+
+	if (!effect)
+	{
+		return;
+	}
+
+	effect->SetVariableLinearColor("Color", color);
 }
 
 APlaytimePlayerController::APlaytimePlayerController() : Super()
@@ -131,41 +274,29 @@ void APlaytimePlayerController::ClearSelection()
 	selectedActors.Empty(12);
 }
 
-bool APlaytimePlayerController::FindPawnsAlongLine(const FVector& lineStart, const FVector& lineDirection, float lineWidth, TArray<AActor*>& outActors)
+bool APlaytimePlayerController::DeprojectScreenPositionToLandscape(const FVector2D& screenLocation, FVector& landscapeLocation) const
 {
-	TArray<FHitResult> hitResults;
-
-	FVector lineEnd;
-	if (AStrategicControlPawn* pawn = GetPawn<AStrategicControlPawn>())
+	FVector deprojectedWorldLocation;
+	FVector deprojectedWorldDirection;
+	bool deprojectOk = DeprojectScreenPositionToWorld(screenLocation.X, screenLocation.Y, deprojectedWorldLocation, deprojectedWorldDirection);
+	if (!deprojectOk)
 	{
-		FVector vecToGround = pawn->GetSightLineWithHorizonIntersection();
-		lineEnd = lineDirection + lineDirection * vecToGround.Size() * 1.25f;
-	}
-	else
-	{
-		lineEnd = lineStart + lineDirection * 100000;
-	}
-	// FVector lineEnd = lineStart + lineDirection * 
-	FCollisionQueryParams params;
-	FCollisionShape sphereShape;
-	sphereShape.Sphere.Radius = lineWidth;
-	bool hasBlockingHits = GetWorld()->SweepMultiByProfile(hitResults, lineStart, lineEnd, FQuat::Identity, "Pawn", sphereShape, params);
-
-	for (FHitResult hit : hitResults)
-	{
-		AActor* actor = hit.GetActor();
-		if (ACity* city = Cast<ACity>(actor))
-		{
-			outActors.AddUnique(city);
-		}
-		else if(IAttackable* attackable = Cast<IAttackable>(actor))
-		{
-			outActors.AddUnique(actor);
-		}
+		return false;
 	}
 
-	return outActors.Num() > 0;
+	FHitResult hitResult;
+	FVector traceEnd = deprojectedWorldLocation + deprojectedWorldDirection * 1000000.0f;
+	bool traceHasHit = GetWorld()->LineTraceSingleByChannel(hitResult, deprojectedWorldLocation, traceEnd, CHANNEL_LANDSCAPE_TRACE);
+	if (!traceHasHit)
+	{
+		return false;
+	}
+
+	landscapeLocation = hitResult.ImpactPoint;
+
+	return true;
 }
+
 
 bool APlaytimePlayerController::FindUnitsInsideScreenBox(const FVector2D& boxStart, const FVector2D& boxEnd, TArray<AActor*>& outActors) const
 {
@@ -225,5 +356,23 @@ bool APlaytimePlayerController::FindUnitsInsideScreenBox(const FVector2D& boxSta
 	}
 
 	return outActors.Num() > 0;
+}
+
+void APlaytimePlayerController::SetGenericTeamId(const FGenericTeamId& teamId)
+{
+	APlaytimePlayerState* playerState = GetPlayerState<APlaytimePlayerState>();
+	check(playerState);
+	playerState->SetGenericTeamId(teamId);
+}
+
+FGenericTeamId APlaytimePlayerController::GetGenericTeamId() const
+{
+	APlaytimePlayerState* playerState = GetPlayerState<APlaytimePlayerState>();
+	if (!playerState)
+	{
+		return FGenericTeamId::NoTeam;
+	}
+	
+	return playerState->GetGenericTeamId();
 }
 

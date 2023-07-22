@@ -133,14 +133,27 @@ void AAircraftController::DrawFollowedPath(float lineLifetime) const
 #endif
 
 
-AAirbase* AAircraftController::GetHomeBase() const
+AActor* AAircraftController::GetHomeBase() const
 {
 	return HomeBase;
 }
 
-void AAircraftController::SetHomeBase(AAirbase* airbase)
+bool AAircraftController::SetHomeBase(AActor* airbaseActor)
 {
-	HomeBase = airbase;
+	if (!airbaseActor)
+	{
+		HomeBase = nullptr;
+	}
+	else if(Cast<IAirbaseInterface>(airbaseActor))
+	{
+		HomeBase = airbaseActor;
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void AAircraftController::SetGenericTeamId(const FGenericTeamId& team)
@@ -244,5 +257,65 @@ int AAircraftController::GetNumMissilesTargetingActor(AActor* actor) const
 bool AAircraftController::IsTargetEngaged(AActor* targetActor) const
 {
 	return targetActor == GetEngagedTarget();
+}
+
+bool AAircraftController::IssueGenericPointOrder(const FVector& location, bool queue)
+{
+	AAircraft* aircraft = GetPawn<AAircraft>();
+	check(aircraft);
+
+	UAircraftMovementComponent* movement = aircraft->GetAircraftMovementComponent();
+	float maxSpeed = movement->GetMaxSpeed();
+
+	TArray<FAircraftWaypoint> pathToLocation;
+
+	pathToLocation.Add(FAircraftWaypoint(location, maxSpeed));
+
+	UAirPath* pathObject = NewObject<UAirPath>(this, TEXT("AirPath"));
+	pathObject->SetWaypoints(pathToLocation);
+
+	SetFollowedPath(pathObject);
+	return true;
+}
+
+bool AAircraftController::IssueGenericActorOrder(AActor* targetActor, bool queue)
+{
+	if (IAirbaseInterface* airbase = Cast<IAirbaseInterface>(targetActor))
+	{
+		bool bHomeBaseOk = SetHomeBase(targetActor);
+		if (!bHomeBaseOk)
+		{
+			return false;
+		}
+
+
+		return true;
+	}
+
+	return false;
+}
+
+bool AAircraftController::CanLandOnBase(const AActor* airbaseActor) const
+{
+	AAircraft* aircraft = GetPawn<AAircraft>();
+	check(aircraft);
+	const IAirbaseInterface* airbase = Cast<IAirbaseInterface>(airbaseActor);
+
+	return aircraft->CanLandOnBase(airbase);
+}
+
+bool AAircraftController::LandOnBase(AActor* airbaseActor)
+{
+	AAircraft* aircraft = GetPawn<AAircraft>();
+	check(aircraft);
+	IAirbaseInterface* airbase = Cast<IAirbaseInterface>(airbaseActor);
+
+	if (!aircraft->CanLandOnBase(airbase))
+	{
+		return false;
+	}
+
+	aircraft->LandOnBase(airbase);
+	return true;
 }
 

@@ -3,6 +3,7 @@
 
 #include "ShipController.h"
 #include "Ship.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 AShipController::AShipController() : Super()
 {
@@ -35,4 +36,34 @@ void AShipController::SetGenericTeamId(const FGenericTeamId& team)
 	}
 
 	ship->SetGenericTeamId(team);
+}
+
+bool AShipController::IssueGenericPointOrder(const FVector& location, bool queue)
+{
+	if (!HoldPositionTree)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ScoutLocationTree not defined!"));
+	}
+	
+	RunBehaviorTree(ScoutLocationTree);
+
+	GetBlackboardComponent()->SetValueAsVector("Location", location);
+
+	return true;
+}
+
+bool AShipController::IssueGenericActorOrder(AActor* actor, bool queue)
+{
+	return false;
+}
+
+bool AShipController::IssueStopOrder()
+{
+	if (!HoldPositionTree)
+	{
+		UE_LOG(LogTemp, Error, TEXT("HoldPositionTree not defined!"));
+		return false;
+	}
+	RunBehaviorTree(HoldPositionTree);
+	return true;
 }

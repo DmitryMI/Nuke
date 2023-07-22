@@ -198,9 +198,9 @@ bool AAircraft::GetTrackedThreats(TArray<AActor*>& outThreats) const
 	return outThreats.Num() > 0;
 }
 
-bool AAircraft::CanLandOnBase(AAirbase* airbase) const
+bool AAircraft::CanLandOnBase(const IAirbaseInterface* airbase) const
 {
-	if (!airbase || !airbase->IsAlive())
+	if (!airbase)
 	{
 		return false;
 	}
@@ -210,23 +210,27 @@ bool AAircraft::CanLandOnBase(AAirbase* airbase) const
 		return false;
 	}
 
-	if (FGenericTeamId::GetAttitude(airbase->GetGenericTeamId(), GetGenericTeamId()) != ETeamAttitude::Friendly)
+	if (!airbase->CanAircraftLand(this))
 	{
 		return false;
 	}
 
-	FVector baseLocation = airbase->GetActorLocation();
-	FVector aircraftLocation = GetActorLocation();
+	if (const AActor* airbaseActor = Cast<AActor>(airbase))
+	{
+		FVector baseLocation = airbaseActor->GetActorLocation();
+		FVector aircraftLocation = GetActorLocation();
 
-	return (baseLocation - aircraftLocation).SizeSquared() <= landingDistance * landingDistance;
+		return (baseLocation - aircraftLocation).SizeSquared() <= landingDistance * landingDistance;
+	}
+
+	return true;
 }
 
-void AAircraft::LandOnBase(AAirbase* airbase)
+void AAircraft::LandOnBase(IAirbaseInterface* airbase)
 {
-	if (CanLandOnBase(airbase))
+	if (CanLandOnBase(airbase) && airbase->LandAircraft(this))
 	{
 		DestroyDelayed();
-		airbase->SetNumberOfFighters(airbase->GetNumberOfFighters() + 1);
 	}
 }
 

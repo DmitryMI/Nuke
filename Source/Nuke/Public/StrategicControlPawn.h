@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "GenericTeamAgentInterface.h"
 #include "StrategicControlPawn.generated.h"
 
 UCLASS()
-class NUKE_API AStrategicControlPawn : public APawn
+class NUKE_API AStrategicControlPawn : public APawn, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -50,7 +51,15 @@ public:
 	void SetZoom(float zoom);
 
 	UFUNCTION(Server, Reliable)
-	void IssueMoveOrder(AActor* unitActor, const FVector& location);
+	void SubmitGenericPointOrder(AActor* unitActor, const FVector& location, bool bQueue);
+
+	UFUNCTION(Server, Reliable)
+	void SubmitGenericActorOrder(AActor* unitActor, AActor* targetOfOrderActor, bool bQueue);
 
 	FVector GetSightLineWithHorizonIntersection() const;
+
+	virtual void SetGenericTeamId(const FGenericTeamId& teamId) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
+	virtual bool CanCommandUnit(AActor* unit) const;
 };

@@ -11,6 +11,8 @@
 #include "PlaytimePlayerState.h"
 #include "Fighter.h"
 #include "CooperativeController.h"
+#include "UnitControllerInterface.h"
+#include "AirbaseInterface.h"
 #include "AircraftController.generated.h"
 
 class AAirbase;
@@ -19,7 +21,7 @@ class AAirbase;
  * 
  */
 UCLASS()
-class NUKE_API AAircraftController : public AAIController, public ICooperativeController
+class NUKE_API AAircraftController : public AAIController, public ICooperativeController, public IUnitControllerInterface
 {
 	GENERATED_BODY()
 	
@@ -48,7 +50,7 @@ protected:
 	UAirPath* FollowedAirPath;
 
 	UPROPERTY(VisibleAnywhere)
-	AAirbase* HomeBase = nullptr;
+	AActor* HomeBase = nullptr;
 
 	virtual void BeginPlay() override;
 
@@ -80,10 +82,10 @@ public:
 #endif
 
 	UFUNCTION(BlueprintCallable)
-	AAirbase* GetHomeBase() const;
+	AActor* GetHomeBase() const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetHomeBase(AAirbase* airbase);
+	bool SetHomeBase(AActor* airbaseActor);
 
 	virtual void SetGenericTeamId(const FGenericTeamId& team) override;
 	virtual FGenericTeamId GetGenericTeamId() const override;
@@ -105,4 +107,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsTargetEngaged(AActor* targetActor) const override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool IssueGenericPointOrder(const FVector& location, bool queue = false) override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool IssueGenericActorOrder(AActor* targetActor, bool queue = false) override;
+
+	UFUNCTION(BlueprintCallable)
+	bool CanLandOnBase(const AActor* airbaseActor) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool LandOnBase(AActor* airbaseActor);
 };

@@ -11,6 +11,7 @@
 #include "Radar.h"
 #include "FlareDecoy.h"
 #include "RadarDetectorComponent.h"
+#include "AirbaseInterface.h"
 #include "Aircraft.generated.h"
 
 class AAirbase;
@@ -128,11 +129,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual bool GetTrackedThreats(TArray<AActor*>& outThreats) const override;
 
-	UFUNCTION(BlueprintCallable)
-	bool CanLandOnBase(AAirbase* airbase) const;
+	bool CanLandOnBase(const IAirbaseInterface* airbase) const;
 
-	UFUNCTION(BlueprintCallable)
-	void LandOnBase(AAirbase* airbase);
+	void LandOnBase(IAirbaseInterface* airbase);
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsActorTrackedByRadar(AActor* actor) const override;

@@ -3,8 +3,22 @@
 
 #include "UnitController.h"
 
-// Add default functionality here for any IControllerMovable functions that are not pure virtual.
-bool IUnitController::IssueMoveOrder(const FVector& location)
+bool AUnitController::IssueGenericPointOrder(const FVector& location, bool queue)
 {
 	return false;
+}
+
+bool AUnitController::IssueGenericActorOrder(AActor* actor, bool queue)
+{
+	return false;
+}
+
+bool AUnitController::IssueStopOrder()
+{
+	return false;
+}
+
+void AUnitController::ReportOrderFinished(bool bSuccessful)
+{
+	IssueStopOrder();
 }

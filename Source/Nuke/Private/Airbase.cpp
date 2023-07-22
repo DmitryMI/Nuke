@@ -4,6 +4,7 @@
 #include "Airbase.h"
 #include "Kismet/GameplayStatics.h"
 #include "AircraftController.h"
+#include "GenericTeamAgentInterface.h"
 
 void AAirbase::OnLauchStateCooldownExpired()
 {
@@ -145,6 +146,62 @@ UFogOfWarComponent* AAirbase::GetFogOfWarComponent() const
 {
 	check(fogOfWarComponent);
 	return fogOfWarComponent;
+}
+
+bool AAirbase::CanAircraftLand(const AAircraft* aircraft) const
+{
+	if (!aircraft)
+	{
+		return false;
+	}
+
+	if (!IsAlive())
+	{
+		return false;
+	}
+
+	double distanceSquared = (GetActorLocation() - aircraft->GetActorLocation()).SizeSquared();
+	if (distanceSquared > FMath::Square(landingDistance))
+	{
+		return false;
+	}
+
+	const IGenericTeamAgentInterface* aircraftTeamAgent = Cast<IGenericTeamAgentInterface>(aircraft);
+	if (!aircraftTeamAgent)
+	{
+		return false;
+	}
+	FGenericTeamId selfTeam = GetGenericTeamId();
+	FGenericTeamId aircraftTeam = aircraftTeamAgent->GetGenericTeamId();
+	if (selfTeam == FGenericTeamId::NoTeam || selfTeam != aircraftTeam)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool AAirbase::LandAircraft(AAircraft* aircraft)
+{
+	if (!CanAircraftLand(aircraft))
+	{
+		return false;
+	}
+
+	if (aircraft->GetClass() == fighterType)
+	{
+		fightersNumber++;
+	}
+	else if (aircraft->GetClass() == bomberType)
+	{
+		bombersNumber++;
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
 }
 
 // Called every frame

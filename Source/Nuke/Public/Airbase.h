@@ -8,10 +8,11 @@
 #include "Bomber.h"
 #include "Attackable.h"
 #include "GenericTeamAgentInterface.h"
+#include "AirbaseInterface.h"
 #include "Airbase.generated.h"
 
 UCLASS()
-class NUKE_API AAirbase : public APawn, public IAttackable, public IGenericTeamAgentInterface
+class NUKE_API AAirbase : public APawn, public IAttackable, public IGenericTeamAgentInterface, public IAirbaseInterface
 {
 	GENERATED_BODY()
 
@@ -24,7 +25,11 @@ class NUKE_API AAirbase : public APawn, public IAttackable, public IGenericTeamA
 	UPROPERTY(EditAnywhere)
 	int fightersNumber = 5;
 
+	UPROPERTY(EditAnywhere)
 	int bombersNumber = 5;
+
+	UPROPERTY(EditAnywhere)
+	double landingDistance = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly)
 	float launchCooldownTime = 3.0f;
@@ -89,4 +94,8 @@ public:
 	virtual bool IsAlive() const override;
 
 	virtual UFogOfWarComponent* GetFogOfWarComponent() const;
+
+	virtual bool CanAircraftLand(const AAircraft* aircraft) const override;
+
+	virtual bool LandAircraft(AAircraft* aircraft) override;
 };
