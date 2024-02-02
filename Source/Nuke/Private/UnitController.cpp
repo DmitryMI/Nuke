@@ -3,6 +3,11 @@
 
 #include "UnitController.h"
 
+AUnitController::AUnitController()
+{
+	orderQueueComponent = CreateDefaultSubobject<UOrderQueueComponent>(TEXT("OrderQueue"));
+}
+
 bool AUnitController::IssueGenericPointOrder(const FVector& location, bool queue)
 {
 	return false;
@@ -21,4 +26,9 @@ bool AUnitController::IssueStopOrder()
 void AUnitController::ReportOrderFinished(bool bSuccessful)
 {
 	IssueStopOrder();
+}
+
+UOrderQueueComponent* AUnitController::GetOrderQueueComponent() const
+{
+	return orderQueueComponent;
 }

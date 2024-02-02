@@ -49,6 +49,31 @@ void AAircraftController::ScanForTrackingThreats()
 	}
 }
 
+void AAircraftController::ExecuteOrder(UUnitOrder* order)
+{
+	if (!order)
+	{
+		return;
+	}
+
+	if (UGenericPointOrder* pointOrder = Cast<UGenericPointOrder>(order))
+	{
+		IssueGenericPointOrder(pointOrder->GetTargetLocation(), false);
+	}
+	else if (UGenericActorOrder* actorOrder = Cast<UGenericActorOrder>(order))
+	{
+		IssueGenericActorOrder(actorOrder->GetTargetActor(), false);
+	}
+	else if (UFollowAirPathOrder* pathOrder = Cast<UFollowAirPathOrder>(order))
+	{
+		RunBehaviorTree(ScoutLocationTree);
+	}
+	else if (UDogfightOrder* dogfightOrder = Cast<UDogfightOrder>(order))
+	{
+		RunBehaviorTree(DogfightTree);
+	}
+}
+
 void AAircraftController::OnPossess(APawn* pawn)
 {
 	Super::OnPossess(pawn);
@@ -56,15 +81,27 @@ void AAircraftController::OnPossess(APawn* pawn)
 	radarDetector = pawn->GetComponentByClass<URadarDetectorComponent>();
 }
 
+UAirPath* AAircraftController::GetFollowedPath() const
+{
+	UUnitOrder* order = GetOrderQueueComponent()->GetCurrentOrder();
+	UFollowAirPathOrder* followPathOrder = Cast<UFollowAirPathOrder>(order);
+	if (!followPathOrder)
+	{
+		return nullptr;
+	}
+
+	return followPathOrder->GetAirPath();
+}
+
 bool AAircraftController::HasValidPath() const
 {
-	return FollowedAirPath && FollowedAirPath->IsValid();
+	return GetFollowedPath() && GetFollowedPath()->IsValid();
 }
 
 bool AAircraftController::IsPathFinished() const
 {
 	check(HasValidPath());
-	return FollowedAirPath->IsFinished();
+	return GetFollowedPath()->IsFinished();
 }
 
 bool AAircraftController::IsNearNextWaypoint() const
@@ -74,12 +111,7 @@ bool AAircraftController::IsNearNextWaypoint() const
 		return false;
 	}
 
-	return FollowedAirPath->IsNearNextWaypoint(GetPawn()->GetActorLocation());
-}
-
-void AAircraftController::SetFollowedPath(UAirPath* path)
-{
-	FollowedAirPath = path;
+	return GetFollowedPath()->IsNearNextWaypoint(GetPawn()->GetActorLocation());
 }
 
 bool AAircraftController::FollowNextWaypoint()
@@ -89,13 +121,13 @@ bool AAircraftController::FollowNextWaypoint()
 		return false;
 	}
 
-	if (FollowedAirPath->IsFinished())
+	if (GetFollowedPath()->IsFinished())
 	{
 		return false;
 	}
 
 	UAircraftMovementComponent* movement = GetPawn<AAircraft>()->GetAircraftMovementComponent();
-	movement->RequestFlyTowardsWaypoint(FollowedAirPath->GetNextWaypoint());
+	movement->RequestFlyTowardsWaypoint(GetFollowedPath()->GetNextWaypoint());
 	return true;
 }
 
@@ -128,7 +160,7 @@ void AAircraftController::DrawFollowedPath(float lineLifetime) const
 		return;
 	}
 
-	FollowedAirPath->DebugDrawPath(GetPawn()->GetActorLocation(), lineLifetime);
+	GetFollowedPath()->DebugDrawPath(GetPawn()->GetActorLocation(), lineLifetime);
 }
 #endif
 
@@ -178,33 +210,6 @@ FGenericTeamId AAircraftController::GetGenericTeamId() const
 	}
 
 	return Super::GetGenericTeamId();
-}
-
-void AAircraftController::MakePathToLocationAndFollow(const FVector& location)
-{
-	AAircraft* aircraft = GetPawn<AAircraft>();
-	check(aircraft);
-
-	UAircraftMovementComponent* movement = aircraft->GetAircraftMovementComponent();
-	float maxSpeed = movement->GetMaxSpeed();
-
-	TArray<FAircraftWaypoint> pathToLocation;
-
-	FVector direction = location - aircraft->GetActorLocation();
-	float distance = direction.Size();
-	float intermediateDistance = FMath::Max(10000.0f, distance / 2.0f);
-
-	direction /= distance;
-	FVector intermediatePoint = location - direction * intermediateDistance;
-	intermediatePoint.Z = 3000.0f;
-
-	pathToLocation.Add(FAircraftWaypoint(intermediatePoint, maxSpeed));
-	pathToLocation.Add(FAircraftWaypoint(location, maxSpeed));
-
-	UAirPath* pathObject = NewObject<UAirPath>(this, TEXT("AirPath"));
-	pathObject->SetWaypoints(pathToLocation);
-
-	SetFollowedPath(pathObject);
 }
 
 AActor* AAircraftController::GetEngagedTarget() const
@@ -261,20 +266,75 @@ bool AAircraftController::IsTargetEngaged(AActor* targetActor) const
 
 bool AAircraftController::IssueGenericPointOrder(const FVector& location, bool queue)
 {
+	if (!ScoutLocationTree)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ScoutLocationTree not defined!"));
+		return false;
+	}
+
+	FVector locationCopy = location;
+	locationCopy.Z = 2000;
+
 	AAircraft* aircraft = GetPawn<AAircraft>();
 	check(aircraft);
 
 	UAircraftMovementComponent* movement = aircraft->GetAircraftMovementComponent();
 	float maxSpeed = movement->GetMaxSpeed();
 
+	UUnitOrder* currentOrder = GetOrderQueueComponent()->GetCurrentOrder();
+
+	if (queue)
+	{
+		if (UFollowAirPathOrder* followPathOrder = Cast<UFollowAirPathOrder>(currentOrder))
+		{
+			FAircraftWaypoint waypoint(locationCopy, maxSpeed);
+
+			followPathOrder->GetAirPath()->GetPathWaypointsMutable().Add(waypoint);
+		}
+		else
+		{
+			TArray<FAircraftWaypoint> pathToLocation;
+
+			pathToLocation.Add(FAircraftWaypoint(locationCopy, maxSpeed));
+
+			UAirPath* pathObject = NewObject<UAirPath>(this, TEXT("AirPath"));
+			IssueFollowAirPathOrder(pathObject, true);
+		}
+
+		return true;
+	}
+	
 	TArray<FAircraftWaypoint> pathToLocation;
 
-	pathToLocation.Add(FAircraftWaypoint(location, maxSpeed));
+	pathToLocation.Add(FAircraftWaypoint(locationCopy, maxSpeed));
 
 	UAirPath* pathObject = NewObject<UAirPath>(this, TEXT("AirPath"));
 	pathObject->SetWaypoints(pathToLocation);
 
-	SetFollowedPath(pathObject);
+	IssueFollowAirPathOrder(pathObject, false);
+
+	return true;
+}
+
+bool AAircraftController::IssueFollowAirPathOrder(UAirPath* path, bool queue)
+{
+	check(path->IsValid());
+
+	UFollowAirPathOrder* order = NewObject<UFollowAirPathOrder>(this);
+	order->SetAirPath(path);
+	if (!queue)
+	{
+		GetOrderQueueComponent()->ClearQueue();		
+		GetOrderQueueComponent()->SetCurrentOrder(order);
+
+		RunBehaviorTree(ScoutLocationTree);
+		FollowNextWaypoint();
+	}
+	else
+	{
+		GetOrderQueueComponent()->Enqueue(order);
+	}
+
 	return true;
 }
 
@@ -288,11 +348,38 @@ bool AAircraftController::IssueGenericActorOrder(AActor* targetActor, bool queue
 			return false;
 		}
 
+		if (!ReturnToBaseTree)
+		{
+			UE_LOG(LogTemp, Error, TEXT("ReturnToBaseTree not defined!"));
+			return false;
+		}
+
+		RunBehaviorTree(ReturnToBaseTree);
 
 		return true;
 	}
+	else if (UAIUtils::AreEnemies(GetPawn(), targetActor))
+	{
+		IAttackable* targetAttackable = Cast<IAttackable>(targetActor);
+		if (!targetAttackable)
+		{
+			return false;
+		}
+
+		if (targetAttackable->GetMobilityEnvironmentType() == EMobilityEnvironmentType::MET_Air)
+		{
+			RunBehaviorTree(DogfightTree);
+			GetBlackboardComponent()->SetValueAsObject("DogfightTargetAircraft", targetActor);
+		}
+	}
 
 	return false;
+}
+
+void AAircraftController::ReportOrderFinished(bool bSuccessful)
+{
+	UUnitOrder* nextOrder = GetOrderQueueComponent()->ReportCurrentOrderFinished();
+	ExecuteOrder(nextOrder);
 }
 
 bool AAircraftController::CanLandOnBase(const AActor* airbaseActor) const
@@ -319,3 +406,32 @@ bool AAircraftController::LandOnBase(AActor* airbaseActor)
 	return true;
 }
 
+AActor* UDogfightOrder::GetTargetAircraft() const
+{
+	return targetAircraft;
+}
+
+void UFollowAirPathOrder::SetAirPath(UAirPath* path)
+{
+	this->airPath = path;
+}
+
+UAirPath* UFollowAirPathOrder::GetAirPath() const
+{
+	return airPath;
+}
+
+void UDogfightOrder::SetTargetAircraft(AActor* aircraft)
+{
+	targetAircraft = aircraft;
+}
+
+AActor* UReturnToBaseOrder::GetAirbaseActor() const
+{
+	return airbaseActor;
+}
+
+void UReturnToBaseOrder::SetAirbaseActor(AActor* actor)
+{
+	airbaseActor = actor;
+}

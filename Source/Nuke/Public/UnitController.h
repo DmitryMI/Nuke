@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "UnitControllerInterface.h"
+#include "OrderQueueComponent.h"
 #include "UnitController.generated.h"
 
 /**
@@ -15,11 +16,20 @@ class NUKE_API AUnitController : public AAIController, public IUnitControllerInt
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(EditAnywhere)
+	UOrderQueueComponent* orderQueueComponent;
+
 public:
+	AUnitController();
+
 	virtual bool IssueGenericPointOrder(const FVector& location, bool queue = false) override;
 	virtual bool IssueGenericActorOrder(AActor* actor, bool queue = false) override;
 	virtual bool IssueStopOrder() override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void ReportOrderFinished(bool bSuccessful);
+
+	UFUNCTION(BlueprintCallable)
+	UOrderQueueComponent* GetOrderQueueComponent() const;
 };

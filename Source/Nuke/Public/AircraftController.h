@@ -11,17 +11,66 @@
 #include "PlaytimePlayerState.h"
 #include "Fighter.h"
 #include "CooperativeController.h"
-#include "UnitControllerInterface.h"
+#include "UnitController.h"
 #include "AirbaseInterface.h"
 #include "AircraftController.generated.h"
 
 class AAirbase;
 
+UCLASS()
+class NUKE_API UDogfightOrder : public UUnitOrder
+{
+	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditAnywhere)
+	AActor* targetAircraft;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void SetTargetAircraft(AActor* aircraft);
+
+	UFUNCTION(BlueprintCallable)
+	AActor* GetTargetAircraft() const;
+};
+
+UCLASS()
+class NUKE_API UFollowAirPathOrder : public UUnitOrder
+{
+	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditAnywhere)
+	UAirPath* airPath;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void SetAirPath(UAirPath* path);
+
+	UFUNCTION(BlueprintCallable)
+	UAirPath* GetAirPath() const;
+};
+
+UCLASS()
+class NUKE_API UReturnToBaseOrder : public UFollowAirPathOrder
+{
+	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditAnywhere)
+	AActor* airbaseActor;
+
+public:
+	AActor* GetAirbaseActor() const;
+
+	void SetAirbaseActor(AActor* actor);
+};
+
 /**
  * 
  */
 UCLASS()
-class NUKE_API AAircraftController : public AAIController, public ICooperativeController, public IUnitControllerInterface
+class NUKE_API AAircraftController : public AUnitController, public ICooperativeController
 {
 	GENERATED_BODY()
 	
@@ -45,9 +94,14 @@ private:
 	int trackingFightersNum = 0;
 
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	UBehaviorTree* ScoutLocationTree;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAirPath* FollowedAirPath;
+	UPROPERTY(EditDefaultsOnly)
+	UBehaviorTree* DogfightTree;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBehaviorTree* ReturnToBaseTree;
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* HomeBase = nullptr;
@@ -56,8 +110,13 @@ protected:
 
 	void ScanForTrackingThreats();
 
+	void ExecuteOrder(UUnitOrder* order);
+
 public:
 	virtual void OnPossess(APawn* pawn) override;
+
+	UFUNCTION(BlueprintCallable)
+	UAirPath* GetFollowedPath() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool HasValidPath() const;
@@ -67,9 +126,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsNearNextWaypoint() const;
-
-	UFUNCTION(BlueprintCallable)
-	void SetFollowedPath(UAirPath* path);
 	
 	UFUNCTION(BlueprintCallable)
 	bool FollowNextWaypoint();
@@ -91,9 +147,6 @@ public:
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	UFUNCTION(BlueprintCallable)
-	void MakePathToLocationAndFollow(const FVector& location);
-
-	UFUNCTION(BlueprintCallable)
 	AActor* GetEngagedTarget() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -112,7 +165,12 @@ public:
 	virtual bool IssueGenericPointOrder(const FVector& location, bool queue = false) override;
 
 	UFUNCTION(BlueprintCallable)
+	virtual bool IssueFollowAirPathOrder(UAirPath* path, bool queue = false);
+
+	UFUNCTION(BlueprintCallable)
 	virtual bool IssueGenericActorOrder(AActor* targetActor, bool queue = false) override;
+
+	virtual void ReportOrderFinished(bool bSuccessful);
 
 	UFUNCTION(BlueprintCallable)
 	bool CanLandOnBase(const AActor* airbaseActor) const;
